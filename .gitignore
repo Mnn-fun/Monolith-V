@@ -1,0 +1,21 @@
+# Unreal Engine
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+.vs/
+*.sln
+!Backend/*.sln
+
+# .NET / Backend
+bin/
+obj/
+
+# Secrets & Local Config
+.env.local
+appsettings.Development.json
+
+# Keep docs tracked
+!PromptBook/
+!README.md
+!PROJECT_STATE.md
