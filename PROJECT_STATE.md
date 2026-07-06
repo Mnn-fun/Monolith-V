@@ -2,16 +2,16 @@
 
 > This file is the single source of truth for "where is this project right now." Any AI coding agent (Claude, Antigravity, GitHub Copilot, etc.) picking up this project cold should read this file FIRST, before opening any prompt file.
 
-**Last Completed Prompt ID:** _none — project not yet started_
-**Current Phase:** Not started
-**Last Updated:** 2026-07-06
-**Last Updated By:** (agent/tool name)
+**Last Completed Prompt ID:** P1.3
+**Current Phase:** Phase 1 — Project Foundation
+**Last Updated:** 2026-07-07
+**Last Updated By:** Claude Code
 
 ## Next Prompt To Run
-`P1.1` in `PromptBook/01_Project_Foundation.md`
+`P1.4` in `PromptBook/01_Project_Foundation.md`
 
 ## Build Status
-- Unreal client: not yet created
+- Unreal client: scaffolded, compiles (see path note below); GameMode/Character stubs added, 30Hz server tick configured
 - Dedicated server build: not yet created
 - Backend (ASP.NET): not yet created
 - Database (Oracle): not yet provisioned
@@ -19,10 +19,14 @@
 - CI: not yet configured
 
 ## Files Touched So Far
-_(none)_
+- `game/Monolith_V/` — UE5 project scaffold (`Monolith_V.uproject`, `MonolithV` runtime module, `Source/MonolithV/{Player,Combat,AI,World,Networking,UI}/` placeholder headers)
+- `game/Monolith_V/Source/MonolithV/MonolithVGameMode.h/.cpp` — `AGameModeBase` stub, `DefaultPawnClass = AMonolithVCharacter`
+- `game/Monolith_V/Source/MonolithV/Player/MonolithVCharacter.h/.cpp` — `ACharacter` stub, `bReplicates = true` (replaces `PlaceholderPlayer.h`)
+- `game/Monolith_V/Config/DefaultEngine.ini` — `GlobalDefaultGameMode`, `NetServerMaxTickRate=30`, player speed config
+- `Docs/Architecture/NetworkingNotes.md` (new)
 
 ## Known Issues / Open TODOs
-_(none yet)_
+- Path/naming drift: PromptBook references `Game/MonolithV.uproject`; actual path is `game/Monolith_V/Monolith_V.uproject` (lowercase folder, underscore in project name). Not fixed — later prompts should use the actual path, not the literal path in the prompt text.
 
 ## Environment Notes
 _(record local vs cloud connection strings, ports, credentials locations — NEVER commit actual secrets here, only where they are stored, e.g. ".env.local (gitignored)")_
