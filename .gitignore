@@ -15,8 +15,7 @@ obj/
 .env.local
 appsettings.Development.json
 
-# Private / Internal Documentation
-PromptBook/
-PROJECT_STATE.md
-PROJECT_STATE.MD
-README.md
+# Keep docs tracked
+!PromptBook/
+!README.md
+!PROJECT_STATE.md
