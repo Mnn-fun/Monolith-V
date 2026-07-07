@@ -14,6 +14,7 @@ obj/
 # Secrets & Local Config
 .env.local
 appsettings.Development.json
+UserEngine.ini
 
 # Private development docs (not for public repo)
 PromptBook/

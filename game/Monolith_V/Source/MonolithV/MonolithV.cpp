@@ -1,4 +1,14 @@
 #include "MonolithV.h"
 #include "Modules/ModuleManager.h"
+#include "OnlineSubsystem.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, MonolithV, "MonolithV");
+class FMonolithVModule : public FDefaultGameModuleImpl
+{
+public:
+	virtual void StartupModule() override
+	{
+		UE_LOG(LogTemp, Warning, TEXT("EOS Subsystem: %s"), IOnlineSubsystem::Get(TEXT("EOS")) ? TEXT("OK") : TEXT("NULL"));
+	}
+};
+
+IMPLEMENT_PRIMARY_GAME_MODULE(FMonolithVModule, MonolithV, "MonolithV");
