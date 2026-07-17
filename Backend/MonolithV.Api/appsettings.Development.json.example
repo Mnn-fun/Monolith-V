@@ -1,0 +1,14 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "Oracle": "Data Source=my_tns_alias;User Id=ADMIN;Password=my_secret_password;"
+  },
+  "Redis": {
+    "ConnectionString": "localhost:6379"
+  }
+}
