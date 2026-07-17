@@ -2,19 +2,20 @@
 
 > This file is the single source of truth for "where is this project right now." Any AI coding agent (Claude, Antigravity, GitHub Copilot, etc.) picking up this project cold should read this file FIRST, before opening any prompt file.
 
-**Last Completed Prompt ID:** P1.5
+**Last Completed Prompt ID:** P1.6
 **Current Phase:** Phase 1 — Project Foundation
-**Last Updated:** 2026-07-17
+**Last Updated:** 2026-07-18
 **Last Updated By:** Antigravity
 
 ## Next Prompt To Run
-`P1.6` in `PromptBook/01_Project_Foundation.md`
+`P1.7` in `PromptBook/01_Project_Foundation.md`
 
 ## Build Status
 - Unreal client: scaffolded, compiles (see path note below); GameMode/Character stubs added, 30Hz server tick configured; EOS subsystem confirmed live (`LogOnline: OSS: Created online subsystem instance for: EOS` / `Loaded subsystem for type [EOS]`, no errors)
 - Dedicated server build: not yet created
 - Backend (ASP.NET): scaffolded (`MonolithV.Backend.sln` with `Api`, `Data`, `Tests`), compiles cleanly with zero errors; `GET /health` confirmed responding `200 OK` (`{"status":"healthy",...}`) via Kestrel
-- Database (Oracle): not yet provisioned
+- Database (Oracle): local documentation (`Infra/oracle/README.md`) and `.gitignore` wallet security rules prepped; cloud instance (`Autonomous Transaction Processing`) ready for provisioning in console.
+- Cloud Compute VM: active (`VM.Standard.A1.Flex`, 2 OCPUs, 12 GB RAM, Ubuntu 22.04 LTS, `MonolithV-instance` live in `ap-mumbai-1`); reference script `Infra/cloud/provision-vm.sh` created.
 - Redis: not yet provisioned
 - CI: not yet configured
 
@@ -30,8 +31,11 @@
 - `Backend/MonolithV.Data/` (new) — Data access class library (`MonolithV.Data.csproj`)
 - `Backend/MonolithV.Tests/` (new) — xUnit test suite (`MonolithV.Tests.csproj`), running cleanly
 - `Docs/Architecture/NetworkingNotes.md` (new)
-- `Docs/Architecture/Components.md` (new) — architecture components starting with Backend API
+- `Docs/Architecture/Components.md` — added Deployment Target specification note (OCI Free Tier, Ampere ARM VM, Autonomous Database `_medium`)
 - `Docs/InstallationGuide.md` (new) — EOS setup section
+- `.gitignore` — updated with `Infra/oracle/wallet/` and `*.zip` exclusions
+- `Infra/cloud/provision-vm.sh` (new) — documented OCI CLI reference script for compute and VCN provisioning (`A1.Flex`, `2 OCPUs`, `12 GB RAM`)
+- `Infra/oracle/README.md` (new) — Oracle Autonomous Database wallet directory setup, TNS alias guide (`_medium`), and environment variable reference
 
 ## Known Issues / Open TODOs
 - Path/naming drift: PromptBook references `Game/MonolithV.uproject`; actual path is `game/Monolith_V/Monolith_V.uproject` (lowercase folder, underscore in project name). Not fixed — later prompts should use the actual path, not the literal path in the prompt text.
