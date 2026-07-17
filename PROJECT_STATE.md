@@ -2,19 +2,19 @@
 
 > This file is the single source of truth for "where is this project right now." Any AI coding agent (Claude, Antigravity, GitHub Copilot, etc.) picking up this project cold should read this file FIRST, before opening any prompt file.
 
-**Last Completed Prompt ID:** P1.6
+**Last Completed Prompt ID:** P1.7
 **Current Phase:** Phase 1 — Project Foundation
 **Last Updated:** 2026-07-18
 **Last Updated By:** Antigravity
 
 ## Next Prompt To Run
-`P1.7` in `PromptBook/01_Project_Foundation.md`
+`P1.8` in `PromptBook/01_Project_Foundation.md`
 
 ## Build Status
 - Unreal client: scaffolded, compiles (see path note below); GameMode/Character stubs added, 30Hz server tick configured; EOS subsystem confirmed live (`LogOnline: OSS: Created online subsystem instance for: EOS` / `Loaded subsystem for type [EOS]`, no errors)
 - Dedicated server build: not yet created
 - Backend (ASP.NET): scaffolded (`MonolithV.Backend.sln` with `Api`, `Data`, `Tests`), compiles cleanly with zero errors; `GET /health` confirmed responding `200 OK` (`{"status":"healthy",...}`) via Kestrel
-- Database (Oracle): local documentation (`Infra/oracle/README.md`) and `.gitignore` wallet security rules prepped; cloud instance (`Autonomous Transaction Processing`) ready for provisioning in console.
+- Database (Oracle): local documentation (`Infra/oracle/README.md`), `.gitignore` wallet rules, and V1 DDL schema migration script (`Infra/oracle/schema/V1__init_schema.sql`) defining `PLAYERS`, `SEASONS`, `PLAYER_SEASON_ROLES`, `SHARE_EVENTS`, and `CHECKPOINT_PROGRESS` with explicit CHECK/FK constraints and indexes. ER Diagram documented at `Docs/Architecture/ER_Diagram.md`. Cloud instance (`Autonomous Transaction Processing`) ready for deployment.
 - Cloud Compute VM: active (`VM.Standard.A1.Flex`, 2 OCPUs, 12 GB RAM, Ubuntu 22.04 LTS, `MonolithV-instance` live in `ap-mumbai-1`); reference script `Infra/cloud/provision-vm.sh` created.
 - Redis: not yet provisioned
 - CI: not yet configured
@@ -36,6 +36,8 @@
 - `.gitignore` — updated with `Infra/oracle/wallet/` and `*.zip` exclusions
 - `Infra/cloud/provision-vm.sh` (new) — documented OCI CLI reference script for compute and VCN provisioning (`A1.Flex`, `2 OCPUs`, `12 GB RAM`)
 - `Infra/oracle/README.md` (new) — Oracle Autonomous Database wallet directory setup, TNS alias guide (`_medium`), and environment variable reference
+- `Infra/oracle/schema/V1__init_schema.sql` (new) — V1 DDL schema creation script (`PLAYERS`, `SEASONS`, `PLAYER_SEASON_ROLES`, `SHARE_EVENTS`, `CHECKPOINT_PROGRESS`)
+- `Docs/Architecture/ER_Diagram.md` (new) — Mermaid `erDiagram` block and table constraint definitions
 
 ## Known Issues / Open TODOs
 - Path/naming drift: PromptBook references `Game/MonolithV.uproject`; actual path is `game/Monolith_V/Monolith_V.uproject` (lowercase folder, underscore in project name). Not fixed — later prompts should use the actual path, not the literal path in the prompt text.
