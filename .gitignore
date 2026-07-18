@@ -14,8 +14,13 @@ obj/
 # Secrets & Local Config
 .env.local
 appsettings.Development.json
+UserEngine.ini
+Infra/oracle/wallet/
+*.zip
+
+# Private development docs (not for public repo)
+PromptBook/
 
 # Keep docs tracked
-!PromptBook/
 !README.md
 !PROJECT_STATE.md
