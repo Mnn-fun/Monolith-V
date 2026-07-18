@@ -6,7 +6,7 @@
     }
   },
   "ConnectionStrings": {
-    "Oracle": "Data Source=my_tns_alias;User Id=ADMIN;Password=my_secret_password;"
+    "Oracle": "Data Source=monolithvdb_medium;User Id=ADMIN;Password=my_secret_password;TNS_ADMIN=D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\Infra\\oracle\\wallet;"
   },
   "Redis": {
     "ConnectionString": "localhost:6379"

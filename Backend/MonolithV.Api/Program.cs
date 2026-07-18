@@ -4,7 +4,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// Register Oracle Data Access Layer (P1.8)
+builder.Services.AddScoped<MonolithV.Data.IOracleConnectionFactory, MonolithV.Data.OracleConnectionFactory>();
+builder.Services.AddScoped<MonolithV.Data.IPlayerRepository, MonolithV.Data.PlayerRepository>();
 
 var app = builder.Build();
 
