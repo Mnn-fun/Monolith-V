@@ -70,3 +70,59 @@ When transitioning from Phase 1 local development to Phase 5 OCI cloud deploymen
 - **OS Compatibility**: Both local and cloud instances run `Canonical Ubuntu 22.04 LTS`.
 - **Firewall Consistency**: Both enforce open access only on `22/tcp` (`SSH`) and `7777/udp` (`Game Server UDP`).
 - **Container Architecture**: Both execute the identical `Infra/docker-compose.yml` (`redis:7-alpine`) configuration.
+
+---
+
+## 6. Running the Multiplayer Server (`P2.1` — Listen Server)
+
+> **Architecture Decision:** The Epic Games Launcher distribution of UE5 does not
+> support building dedicated server (`MonolithVServer`) targets — that requires a
+> source build of the engine (~150 GB, 2–4 hrs). For the Month-1 vertical slice
+> we use a **Listen Server** instead: one game instance acts as both server and
+> client, other players connect to it. All networking code (RPCs, replication,
+> `HasAuthority()`, GAS, `UCharacterMovementComponent` prediction/correction) is
+> **identical** between listen server and dedicated server. Upgrading to a true
+> dedicated server post-college requires only a source-built engine recompile —
+> zero C++ code changes.
+
+### Option A: Test via Play-In-Editor (PIE) — Fastest for Development
+
+1. Open `Monolith_V.uproject` in the Unreal Editor.
+2. In the toolbar, click the **Play** dropdown arrow (▼ next to the green Play button).
+3. Under **Multiplayer Options**, set:
+   - **Number of Players**: `2`
+   - **Net Mode**: `Play As Listen Server`
+4. Click **Play**. Two viewports/windows spawn:
+   - **Server (Listen Server + Client 1)** — this instance owns the authoritative game state.
+   - **Client 2** — connects automatically to the listen server.
+5. Both windows should show a character pawn spawned in the `Default` map.
+
+### Option B: Test via Packaged Windows Build — Closer to Production
+
+1. Package a **Windows Development Client** build:
+   ```powershell
+   & "C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="d:\techathons\Sem-7 proj-seminar\Monolith-V\Game\Monolith_V\Monolith_V.uproject" -platform=Win64 -clientconfig=Development -cook -build -stage -pak -archive -archivedirectory="d:\techathons\Sem-7 proj-seminar\Monolith-V\Builds\WindowsClient"
+   ```
+2. Launch the first instance as a **Listen Server**:
+   ```cmd
+   Monolith_V.exe /Game/Default?listen -log -port=7777
+   ```
+3. Launch a second instance as a **connecting client**:
+   ```cmd
+   Monolith_V.exe -log
+   ```
+   Then open the console (`~`) and type: `open 127.0.0.1:7777`
+4. Verify in the server window's log that the client connection is accepted and a pawn spawns.
+
+### Phase 5 Cloud Deployment (Future)
+
+For Oracle Cloud production deployment (`P5.3`), the packaged Windows/Linux
+game client will be launched on the VM with the `?listen` travel URL parameter,
+serving as the authoritative host. The same `7777/udp` firewall rule already
+configured applies. Alternatively, if a true headless dedicated server is
+desired post-college, building Unreal Engine from source (GitHub →
+`EpicGames/UnrealEngine`) enables the `MonolithVServer` target with zero C++
+code changes — the `MonolithVServer.Target.cs` file is already present and
+correct in `Source/`.
+
+
