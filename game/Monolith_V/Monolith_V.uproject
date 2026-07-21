@@ -21,6 +21,10 @@
 		{
 			"Name": "OnlineSubsystemEOS",
 			"Enabled": true
+		},
+		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
 		}
 	]
 }
