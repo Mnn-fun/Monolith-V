@@ -21,11 +21,18 @@ AMonolithVCharacter::AMonolithVCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
+	// Configure character net update frequency for 30Hz server-authoritative tick rate
+	NetUpdateFrequency = 30.f;
+	MinNetUpdateFrequency = 10.f;
+
 	// Configure character movement component deliberately for server-authoritative networked movement
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = true; // Character rotates to movement direction
 		GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
+
+		// Client-side prediction & smoothing tuning for 30Hz tick responsiveness
+		GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
 
 		// Deliberate, documented movement tuning (these become tuning knobs later for jetpack traversal in Phase 3)
 		GetCharacterMovement()->MaxWalkSpeed = 600.f;
