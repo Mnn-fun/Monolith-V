@@ -1,0 +1,20 @@
+{
+	"configurations": [
+		{
+			"name": "MonolithVEditor Editor Win64 Development (Monolith_V)",
+			"compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"cStandard": "c17",
+			"cppStandard": "c++20",
+			"intelliSenseMode": "msvc-x64",
+			"compileCommands": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V.json"
+		},
+		{
+			"name": "Win32",
+			"compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"cStandard": "c17",
+			"cppStandard": "c++20",
+			"intelliSenseMode": "msvc-x64",
+			"compileCommands": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Default.json"
+		}
+	]
+}

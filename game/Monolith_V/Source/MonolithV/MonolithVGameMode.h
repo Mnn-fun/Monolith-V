@@ -11,4 +11,10 @@ class MONOLITHV_API AMonolithVGameMode : public AGameModeBase
 
 public:
 	AMonolithVGameMode();
+
+protected:
+	virtual void StartPlay() override;
+
+	UPROPERTY()
+	TObjectPtr<class AAltitudeStreamingManager> AltitudeStreamingManager;
 };

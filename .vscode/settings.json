@@ -1,0 +1,8 @@
+{
+	"C_Cpp.default.compileCommands": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\compile_commands.json",
+	"C_Cpp.intelliSenseEngine": "default",
+	"clangd.arguments": [
+		"--compile-commands-dir=D:/techathons/Sem-7 proj-seminar/Monolith-V",
+		"--header-insertion=never"
+	]
+}

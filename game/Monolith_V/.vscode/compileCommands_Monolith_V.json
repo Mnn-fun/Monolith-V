@@ -1,0 +1,178 @@
+[
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\AI\\PlaceholderAI.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\Combat\\GA_TestAbility.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\Combat\\GA_TestAbility.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\Combat\\GE_TestDamage.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\Combat\\GE_TestDamage.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\Combat\\MonolithVAttributeSet.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\Combat\\MonolithVAttributeSet.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\MonolithV.Build.cs",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\MonolithV.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\MonolithV.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\MonolithVGameMode.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\MonolithVGameMode.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\Networking\\PlaceholderNetworking.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\Player\\MonolithVCharacter.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\Player\\MonolithVCharacter.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\Player\\MonolithVPlayerController.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\Player\\MonolithVPlayerController.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\UI\\PlaceholderUI.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\World\\AltitudeBand.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\World\\AltitudeStreamingManager.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\World\\AltitudeStreamingManager.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\Source\\MonolithV\\World\\PlaceholderWorld.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\game\\Monolith_V\\.vscode\\compileCommands_Monolith_V\\MonolithV.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.7\\Engine\\Source"
+	}
+]
