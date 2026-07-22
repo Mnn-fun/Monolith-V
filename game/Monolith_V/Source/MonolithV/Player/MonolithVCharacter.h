@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "AbilitySystemInterface.h"
 #include "MonolithVCharacter.generated.h"
 
 class UInputMappingContext;
@@ -10,9 +11,12 @@ class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
 class UStaticMeshComponent;
+class UAbilitySystemComponent;
+class UMonolithVAttributeSet;
+class UGameplayAbility;
 
 UCLASS()
-class MONOLITHV_API AMonolithVCharacter : public ACharacter
+class MONOLITHV_API AMonolithVCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -22,13 +26,18 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	// Replicated Health placeholder (used for OnRep verification in P2.2, later replaced by GAS AttributeSet in P2.4)
-	UPROPERTY(ReplicatedUsing = OnRep_Health, EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-	float Health;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
+	UAbilitySystemComponent* AbilitySystemComponent;
 
-	UFUNCTION()
-	void OnRep_Health(float OldHealth);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
+	UMonolithVAttributeSet* AttributeSet;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GAS")
+	TSubclassOf<UGameplayAbility> TestAbilityClass;
 
 protected:
 	/** Camera boom positioning the camera behind the character */
@@ -53,7 +62,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* TestAbilityAction;
+
 	// Enhanced Input callback handlers
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void OnTestAbilityPressed(const FInputActionValue& Value);
 };

@@ -11,6 +11,4 @@ class MONOLITHV_API AMonolithVGameMode : public AGameModeBase
 
 public:
 	AMonolithVGameMode();
-	virtual void PostLogin(APlayerController* NewPlayer) override;
-	virtual APawn* SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot) override;
 };

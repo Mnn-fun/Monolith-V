@@ -11,6 +11,9 @@
 #include "InputAction.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Net/UnrealNetwork.h"
+#include "AbilitySystemComponent.h"
+#include "../Combat/MonolithVAttributeSet.h"
+#include "../Combat/GA_TestAbility.h"
 
 AMonolithVCharacter::AMonolithVCharacter()
 {
@@ -22,8 +25,8 @@ AMonolithVCharacter::AMonolithVCharacter()
 	bUseControllerRotationRoll = false;
 
 	// Configure character net update frequency for 30Hz server-authoritative tick rate
-	NetUpdateFrequency = 30.f;
-	MinNetUpdateFrequency = 10.f;
+	SetNetUpdateFrequency(30.f);
+	SetMinNetUpdateFrequency(10.f);
 
 	// Configure character movement component deliberately for server-authoritative networked movement
 	if (GetCharacterMovement())
@@ -41,8 +44,14 @@ AMonolithVCharacter::AMonolithVCharacter()
 		GetCharacterMovement()->AirControl = 0.35f;
 	}
 
-	// Initialize Health
-	Health = 100.0f;
+	// Create AbilitySystemComponent and AttributeSet for GAS
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
+
+	AttributeSet = CreateDefaultSubobject<UMonolithVAttributeSet>(TEXT("AttributeSet"));
+
+	TestAbilityClass = UGA_TestAbility::StaticClass();
 
 	// Create a visual mesh so characters are visible to each other in multiplayer sessions
 	VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualMesh"));
@@ -118,6 +127,20 @@ AMonolithVCharacter::AMonolithVCharacter()
 		if (LookAssetSub.Succeeded())
 		{
 			LookAction = LookAssetSub.Object;
+		}
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> TestAbilityAsset(TEXT("/Game/IA_TestAbility.IA_TestAbility"));
+	if (TestAbilityAsset.Succeeded())
+	{
+		TestAbilityAction = TestAbilityAsset.Object;
+	}
+	else
+	{
+		static ConstructorHelpers::FObjectFinder<UInputAction> TestAbilityAssetSub(TEXT("/Game/Input/IA_TestAbility.IA_TestAbility"));
+		if (TestAbilityAssetSub.Succeeded())
+		{
+			TestAbilityAction = TestAbilityAssetSub.Object;
 		}
 	}
 }
@@ -200,6 +223,15 @@ void AMonolithVCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		{
 			UE_LOG(LogTemp, Error, TEXT("LookAction is NULL on %s! Cannot bind Look!"), *GetName());
 		}
+
+		if (TestAbilityAction)
+		{
+			EnhancedInputComponent->BindAction(TestAbilityAction, ETriggerEvent::Triggered, this, &AMonolithVCharacter::OnTestAbilityPressed);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("TestAbilityAction is NULL on %s! Cannot bind OnTestAbilityPressed!"), *GetName());
+		}
 	}
 }
 
@@ -235,14 +267,49 @@ void AMonolithVCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void AMonolithVCharacter::OnTestAbilityPressed(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent && TestAbilityClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AMonolithVCharacter::OnTestAbilityPressed on %s - TryActivateAbilityByClass(%s)"), *GetName(), *TestAbilityClass->GetName());
+		AbilitySystemComponent->TryActivateAbilityByClass(TestAbilityClass);
+	}
+}
+
+void AMonolithVCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+		UE_LOG(LogTemp, Warning, TEXT("AMonolithVCharacter::PossessedBy - InitAbilityActorInfo called on Server for %s"), *GetName());
+
+		if (HasAuthority() && TestAbilityClass)
+		{
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(TestAbilityClass, 1, 0, this));
+			UE_LOG(LogTemp, Warning, TEXT("AMonolithVCharacter::PossessedBy - Granted TestAbilityClass %s to %s"), *TestAbilityClass->GetName(), *GetName());
+		}
+	}
+}
+
+void AMonolithVCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+		UE_LOG(LogTemp, Warning, TEXT("AMonolithVCharacter::OnRep_PlayerState - InitAbilityActorInfo called on Client for %s"), *GetName());
+	}
+}
+
+UAbilitySystemComponent* AMonolithVCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
 void AMonolithVCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AMonolithVCharacter, Health);
-}
-
-void AMonolithVCharacter::OnRep_Health(float OldHealth)
-{
-	UE_LOG(LogTemp, Display, TEXT("AMonolithVCharacter: Health replicated from %f to %f on %s"), OldHealth, Health, *GetName());
 }
