@@ -31,3 +31,49 @@ sequenceDiagram
         ServerCMC->>OtherClient: Replicate Corrected Position
     end
 ```
+```
+
+## Atomic Share-Event Dual-Layer Concurrency Flow (`P2.7`)
+
+The following sequence diagram illustrates the concurrency-safe, race-condition-proof transaction pipeline (`POST /seasons/{seasonId}/share-events`) recording a Golden Apple / Counterpart Item share between two players. It demonstrates the dual-layer defense-in-depth architecture: keyed in-memory serialization (`SemaphoreSlim`) to eliminate database contention across identical concurrent requests, combined with database-level uniqueness enforcement (`ORA-00001` unique constraint on `SHARE_EVENTS(season_id, giver_player_id, receiver_player_id, item_type)`) as the absolute single source of truth across horizontal scaling boundaries:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor ClientA as Concurrent Request A (Client 1)
+    actor ClientB as Concurrent Request B (Client 2)
+    participant API as ShareEventsController
+    participant Repo as ShareEventRepository
+    participant Lock as Keyed SemaphoreSlim (In-Process)
+    participant DB as Oracle Database (SHARE_EVENTS & PLAYER_SEASON_ROLES)
+
+    Note over ClientA,ClientB: Near-simultaneous share attempts for identical (SeasonId, GiverId, ReceiverId, ItemType)
+    ClientA->>API: POST /seasons/s1/share-events { Giver, Receiver, GOLDEN_APPLE }
+    ClientB->>API: POST /seasons/s1/share-events { Giver, Receiver, GOLDEN_APPLE }
+    API->>Repo: RecordShareEventAsync(s1, Giver, Receiver, GOLDEN_APPLE)
+    API->>Repo: RecordShareEventAsync(s1, Giver, Receiver, GOLDEN_APPLE)
+
+    Note over Repo,Lock: Keyed lock: lockKey = "s1:Giver:Receiver:GOLDEN_APPLE"
+    Repo->>Lock: WaitAsync() [Request A acquires lock immediately]
+    Repo->>Lock: WaitAsync() [Request B blocks waiting for Request A]
+
+    Note over Repo,DB: Request A executes guarded critical section
+    Repo->>DB: SELECT role FROM player_season_roles WHERE season_id = s1 AND player_id IN (Giver, Receiver)
+    DB-->>Repo: Returns opposite roles ('MALE' vs 'FEMALE')
+    Repo->>DB: BEGIN TRANSACTION -> INSERT INTO share_events (share_event_id, s1, Giver, Receiver, GOLDEN_APPLE)
+    DB-->>Repo: 1 row inserted (uq_share_events_atomic satisfied) -> COMMIT
+    Repo->>Lock: Release() [Request A unlocks semaphore]
+    Repo-->>API: ShareEventResult(Success: true, AlreadyShared: false, ShareEventId: ...)
+    API-->>ClientA: 200 OK { success: true, alreadyShared: false, shareEventId: "..." }
+
+    Note over Repo,DB: Request B unblocks and enters critical section
+    Repo->>DB: SELECT role FROM player_season_roles WHERE season_id = s1 AND player_id IN (Giver, Receiver)
+    DB-->>Repo: Returns opposite roles ('MALE' vs 'FEMALE')
+    Repo->>DB: BEGIN TRANSACTION -> INSERT INTO share_events (share_event_id, s1, Giver, Receiver, GOLDEN_APPLE)
+    Note over DB: uq_share_events_atomic UNIQUE constraint triggers!
+    DB-->>Repo: Throws OracleException ORA-00001 (Unique Constraint Violation) -> ROLLBACK
+    Note over Repo: Catch IsUniqueConstraintViolation(ex) -> Idempotent no-op treatment
+    Repo->>Lock: Release() [Request B unlocks semaphore]
+    Repo-->>API: ShareEventResult(Success: true, AlreadyShared: true, ShareEventId: null)
+    API-->>ClientB: 200 OK { success: true, alreadyShared: true, message: "Share event already recorded." }
+```

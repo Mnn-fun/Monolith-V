@@ -19,6 +19,7 @@ builder.Services.AddScoped<MonolithV.Data.IPlayerRepository>(sp =>
         sp.GetRequiredService<StackExchange.Redis.IConnectionMultiplexer>(),
         sp.GetRequiredService<ILogger<MonolithV.Data.CachedPlayerRepository>>()
     ));
+builder.Services.AddScoped<MonolithV.Data.IShareEventRepository, MonolithV.Data.ShareEventRepository>();
 
 var app = builder.Build();
 
