@@ -74,3 +74,27 @@
 | **3. Multi-Tenant Split Band** | `Player 1: Z=90 (Band_00)`, `Player 2: Z=8500 (Band_04)` | `Band_00`, `Band_01`, `Band_03`, `Band_04` | `Band_02` | Server independently maintains buffer bands for both players across disconnected vertical slices. | ✅ Verified |
 | **4. Automatic Actor Replication** | `Player 1 teleports via BugItGo 0 0 2550` | `Band_01` loaded on Server | `Band_00` unloads | `OnBandLevelLoaded` loop triggers `SetReplicates(true)` on all sublevel actors, replicating meshes instantly to Client 1 without manual Editor configuration. | ✅ Verified |
 
+---
+
+### P2.6: EOS Login & Session Join Verification
+
+#### Objectives
+- Verify `UEOSLoginSubsystem` authenticates clients via `IOnlineIdentity::Login()` against the EOS Developer Authentication Tool (`AuthType = "developer"`) and returns canonical `EOS_ProductUserId` strings.
+- Verify `UEOSSessionSubsystem` advertises sessions on authoritative server startup (`CreateSession(16, bIsDedicated)`), and clients can successfully discover (`FindSessions`) and connect to them (`JoinSession` + `ClientTravel`).
+- Confirm direct-IP `open <ip>:7777` remains functional as a documented debug fallback.
+
+#### Test Environment
+- **Auth Tool**: Local `EOS_DevAuthTool.exe` running on port `8081` (`PlayerAlpha`, `PlayerBeta`)
+- **Subsystems**: `UEOSLoginSubsystem` & `UEOSSessionSubsystem` (`UGameInstanceSubsystem`)
+- **Server**: Authoritative Dedicated / Listen Server (`AMonolithVGameMode::StartPlay()`)
+
+#### Observed Behavior & Verification Results
+
+| Test Scenario | Input / Action | Expected Outcome | Observed Log / Result | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. Dev Auth Login** | Client executes `Login("localhost:8081", "PlayerAlpha", "developer")` | Subsystem calls `Identity->Login()`, delegate fires `OnLoginComplete(true, ProductUserIdStr)`. | `[EOSLogin] Login successful! EOS_ProductUserId: 0002b80f...` | ✅ Verified (Manual Dev Auth test) |
+| **2. Session Advertisement** | Dedicated/Listen Server starts (`StartPlay()`) | `UEOSSessionSubsystem::CreateSession(16, bIsDedicated)` sets up and registers public session. | `[EOSSession] Successfully created session: GameSession` | ✅ Verified |
+| **3. Session Discovery** | Client executes `FindSessions(20)` | Matchmaking queries EOS with `"MonolithV"` keyword, populates `SearchResults`. | `[EOSSession] FindSessions completed (Success: True, Results: 1)` | ✅ Verified |
+| **4. Session Join & Travel** | Client executes `JoinSession(0)` | Subsystem resolves connection URL and triggers `PC->ClientTravel(ConnectString, TRAVEL_Absolute)`. | `[EOSSession] Successfully joined session! Resolved ConnectString: <ip>:7777` -> Client travels cleanly. | ✅ Verified |
+| **5. Direct-IP Fallback** | Client runs `open 127.0.0.1:7777` in console | Client bypasses EOS matchmaking and connects directly to authoritative server. | Client travels immediately to server world without errors. | ✅ Verified |
+
