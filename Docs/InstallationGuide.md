@@ -13,3 +13,13 @@ The project uses Epic Online Services (EOS) via the engine's built-in `OnlineSub
    ```
    `ArtifactName` must be left **empty** — `UEOSSettings::GetSelectedArtifactSettings()` (engine source: `Engine/Plugins/Online/OnlineSubsystemEOS/Source/OnlineSubsystemEOS/Private/EOSSettings.cpp`) only auto-selects a named artifact if `DefaultArtifactName` is also set to match it; with a single artifact and no `-EpicApp=` launch argument, an empty `ArtifactName` is what the engine's own fallback path resolves to. The struct field is `ClientEncryptionKey`, not `EncryptionKey` (renamed in engine source; `EncryptionKey` is silently ignored).
 3. Launch the editor and search the Output Log for `EOS Subsystem` to confirm it prints `OK`, not `NULL`.
+
+---
+
+## Local Dev VM (WSL2 / Linux Environment)
+
+For day-to-day backend and dedicated server development, **Monolith-V** utilizes a local Ubuntu 22.04 LTS virtual environment (via WSL2 or standard hypervisor VM) that mirrors our target Oracle Cloud Infrastructure (`provision-vm.sh`) runtime.
+
+For complete step-by-step provisioning instructions, core runtime requirements (`.NET 8/10 SDK`, `Docker Engine`, `Docker Compose V2`, `Redis CLI`, `UFW`), and cloud environment parity verification, refer directly to our authoritative guide:
+👉 **[Local Linux Development Environment Setup (`local-vm-setup.md`)](file:///d:/techathons/Sem-7%20proj-seminar/Monolith-V/Infra/cloud/local-vm-setup.md)**
+
