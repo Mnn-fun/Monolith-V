@@ -77,3 +77,40 @@ sequenceDiagram
     Repo-->>API: ShareEventResult(Success: true, AlreadyShared: true, ShareEventId: null)
     API-->>ClientB: 200 OK { success: true, alreadyShared: true, message: "Share event already recorded." }
 ```
+
+## Phase P2.8 — Atomic Checkpoint-Claim Transaction Sequence (`POST /seasons/{seasonId}/players/{playerId}/checkpoints`)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor ClientA as Dedicated Server (Thread 1)
+    actor ClientB as Dedicated Server (Thread 2)
+    participant API as CheckpointsController
+    participant Repo as CheckpointRepository
+    participant Lock as SemaphoreSlim (season:player:checkpointIndex)
+    participant DB as Oracle Database (CHECKPOINT_PROGRESS)
+
+    Note over ClientA,ClientB: Both threads attempt to record checkpoint index 1 simultaneously
+    ClientA->>API: POST /seasons/s1/players/pA/checkpoints { checkpointIndex: 1 }
+    ClientB->>API: POST /seasons/s1/players/pA/checkpoints { checkpointIndex: 1 }
+
+    API->>Repo: RecordCheckpointProgressAsync("s1", "pA", 1)
+    Repo->>Lock: WaitAsync("s1:pA:1")
+    Note over Repo,Lock: Request A acquires semaphore lock; Request B suspends waiting
+
+    Note over Repo,DB: Request A executes critical section
+    Repo->>DB: BEGIN TRANSACTION -> INSERT INTO checkpoint_progress (player_id, season_id, checkpoint_index, reached_at)
+    DB-->>Repo: 1 row inserted (pk_checkpoint_progress satisfied) -> COMMIT
+    Repo->>Lock: Release() [Request A unlocks semaphore]
+    Repo-->>API: CheckpointClaimResult(Success: true, AlreadyClaimed: false)
+    API-->>ClientA: 200 OK { success: true, alreadyClaimed: false, checkpointIndex: 1 }
+
+    Note over Repo,DB: Request B unblocks and enters critical section
+    Repo->>DB: BEGIN TRANSACTION -> INSERT INTO checkpoint_progress (player_id, season_id, checkpoint_index, reached_at)
+    Note over DB: pk_checkpoint_progress (player_id, season_id, checkpoint_index) triggers!
+    DB-->>Repo: Throws OracleException ORA-00001 (Unique Constraint Violation) -> ROLLBACK
+    Note over Repo: Catch IsUniqueConstraintViolation(ex) -> Idempotent no-op treatment
+    Repo->>Lock: Release() [Request B unlocks semaphore]
+    Repo-->>API: CheckpointClaimResult(Success: true, AlreadyClaimed: true)
+    API-->>ClientB: 200 OK { success: true, alreadyClaimed: true, message: "Checkpoint already claimed." }
+```

@@ -20,6 +20,7 @@ builder.Services.AddScoped<MonolithV.Data.IPlayerRepository>(sp =>
         sp.GetRequiredService<ILogger<MonolithV.Data.CachedPlayerRepository>>()
     ));
 builder.Services.AddScoped<MonolithV.Data.IShareEventRepository, MonolithV.Data.ShareEventRepository>();
+builder.Services.AddScoped<MonolithV.Data.ICheckpointRepository, MonolithV.Data.CheckpointRepository>();
 
 var app = builder.Build();
 
