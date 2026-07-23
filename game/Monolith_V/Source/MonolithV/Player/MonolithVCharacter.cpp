@@ -14,6 +14,8 @@
 #include "AbilitySystemComponent.h"
 #include "../Combat/MonolithVAttributeSet.h"
 #include "../Combat/GA_TestAbility.h"
+#include "../Networking/BackendApiClient.h"
+#include "Engine/GameInstance.h"
 
 AMonolithVCharacter::AMonolithVCharacter()
 {
@@ -312,4 +314,53 @@ UAbilitySystemComponent* AMonolithVCharacter::GetAbilitySystemComponent() const
 void AMonolithVCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AMonolithVCharacter, bDebugShareConfirmed);
+}
+
+void AMonolithVCharacter::OnRep_DebugShareConfirmed()
+{
+	UE_LOG(LogTemp, Warning, TEXT("[Client] Server confirmed the debug share event! bDebugShareConfirmed is TRUE on %s"), *GetName());
+}
+
+bool AMonolithVCharacter::ServerRequestShareItem_Validate()
+{
+	return true;
+}
+
+void AMonolithVCharacter::DebugRequestShare()
+{
+	if (IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Client] Requesting Share Item..."));
+		ServerRequestShareItem();
+	}
+}
+
+void AMonolithVCharacter::ServerRequestShareItem_Implementation()
+{
+	// TODO Phase 3: Check distance/possession server-side here before talking to backend
+
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		// Note: Include "Networking/BackendApiClient.h" at the top of the file
+		if (UBackendApiClient* ApiClient = GI->GetSubsystem<UBackendApiClient>())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[Server] Calling BackendApiClient->PostShareEvent for %s"), *GetName());
+			ApiClient->PostShareEvent(TEXT("season_1"), TEXT("player_a"), TEXT("player_b"), TEXT("relic"), [this](bool bSuccess, bool bAlreadyShared)
+			{
+				if (bSuccess)
+				{
+					this->bDebugShareConfirmed = true;
+					// Force a net update so clients see it immediately
+					this->ForceNetUpdate();
+					UE_LOG(LogTemp, Warning, TEXT("[Server] PostShareEvent succeeded. Replicating bDebugShareConfirmed=true to clients."));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("[Server] PostShareEvent failed."));
+				}
+			});
+		}
+	}
 }

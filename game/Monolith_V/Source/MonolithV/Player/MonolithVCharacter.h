@@ -30,6 +30,18 @@ public:
 	virtual void OnRep_PlayerState() override;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	UPROPERTY(ReplicatedUsing=OnRep_DebugShareConfirmed, BlueprintReadOnly, Category = "Networking")
+	bool bDebugShareConfirmed;
+
+	UFUNCTION()
+	void OnRep_DebugShareConfirmed();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRequestShareItem();
+
+	UFUNCTION(Exec)
+	void DebugRequestShare();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
 	UAbilitySystemComponent* AbilitySystemComponent;
 

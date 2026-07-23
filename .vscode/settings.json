@@ -1,8 +1,10 @@
 {
-	"C_Cpp.default.compileCommands": "D:\\techathons\\Sem-7 proj-seminar\\Monolith-V\\compile_commands.json",
+	"C_Cpp.default.compileCommands": "${workspaceFolder}/.vscode/compile_commands.json",
 	"C_Cpp.intelliSenseEngine": "default",
 	"clangd.arguments": [
-		"--compile-commands-dir=D:/techathons/Sem-7 proj-seminar/Monolith-V",
-		"--header-insertion=never"
+		"--compile-commands-dir=${workspaceFolder}/.vscode",
+		"--header-insertion=never",
+		"--query-driver=C:/Program Files/Microsoft Visual Studio/**/cl.exe",
+		"--background-index"
 	]
 }

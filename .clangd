@@ -1,3 +1,10 @@
 CompileFlags:
-  CompilationDatabase: "."
-  Add: [--driver-mode=cl, -Wno-unknown-pragmas, -Wno-ignored-attributes, -Wno-microsoft-include]
+  Add:
+    - --driver-mode=cl
+    - -Wno-unknown-pragmas
+    - -Wno-unused-value
+    - -Wno-format
+    - -Wno-microsoft
+    - -Wno-invalid-token-paste
+    - -D__GNUC__
+    - -D__clang__

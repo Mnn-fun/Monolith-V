@@ -114,3 +114,36 @@ sequenceDiagram
     Repo-->>API: CheckpointClaimResult(Success: true, AlreadyClaimed: true)
     API-->>ClientB: 200 OK { success: true, alreadyClaimed: true, message: "Checkpoint already claimed." }
 ```
+
+## Phase P2.9 — Unreal-to-Backend HTTP Client Flow
+
+The following sequence demonstrates how the Unreal Game Client performs a server-authoritative request to the backend. The client never talks to the backend directly.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as Unreal Client (Player A)
+    participant Server as Unreal Dedicated Server
+    participant Subsystem as UBackendApiClient (Server Only)
+    participant Backend as ASP.NET Backend API
+    participant DB as Oracle Database
+
+    Client->>Server: ServerRequestShareItem() [Server RPC]
+    
+    Note over Server: Server validates distance/possession preconditions (Phase 3)
+    Server->>Subsystem: PostShareEvent(season_1, player_a, player_b, relic, Callback)
+    Subsystem->>Backend: HTTP POST /api/v1/seasons/season_1/share-events (Async)
+    
+    Note over Server,Subsystem: Game Thread continues ticking without blocking
+    
+    Backend->>DB: INSERT INTO share_events ...
+    DB-->>Backend: OK
+    Backend-->>Subsystem: 200 OK { success: true }
+    
+    Note over Subsystem: OnShareEventResponseReceived (Game Thread)
+    Subsystem->>Server: Callback(bSuccess=true, bAlreadyShared=false)
+    
+    Note over Server: Updates Replicated State
+    Server->>Server: bDebugShareConfirmed = true
+    Server-->>Client: OnRep_DebugShareConfirmed() [Client observes state change]
+```
