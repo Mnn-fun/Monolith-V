@@ -98,3 +98,25 @@
 | **4. Session Join & Travel** | Client executes `JoinSession(0)` | Subsystem resolves connection URL and triggers `PC->ClientTravel(ConnectString, TRAVEL_Absolute)`. | `[EOSSession] Successfully joined session! Resolved ConnectString: <ip>:7777` -> Client travels cleanly. | ✅ Verified |
 | **5. Direct-IP Fallback** | Client runs `open 127.0.0.1:7777` in console | Client bypasses EOS matchmaking and connects directly to authoritative server. | Client travels immediately to server world without errors. | ✅ Verified |
 
+---
+
+### Phase 2 Integration Test
+
+#### Objectives
+- Perform a complete, multi-tenant integration test of all Core Architecture components.
+- Verify end-to-end communication: two clients authenticate via EOS, travel to a server, move, activate abilities, stream altitude bands, select roles, share items, and write data to Oracle Database.
+
+#### Test Execution & Observed Results
+
+| System / Step | Action | Expected Behavior | Observed Result | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. Session & Connect** | Run Server + 2 Clients; connect clients via EOS DevAuth. | Both clients connect, join the matchmaking session, and travel to the gameplay map. | Both pawns spawn in. Log: `JoinSession completed (Success: True)`. | ✅ Pass |
+| **2. Movement Replication** | Move players in both viewports. | Authoritative character movement updates at 30Hz; visual smoothing masks jitter. | Zero rubber-banding under standard play. Teleport checks reject cheats. | ✅ Pass |
+| **3. GAS Ability** | Trigger GA_TestAbility via key press. | Health attribute changes replicate from server to both clients. | Debug overlay shows attribute modifications match server calculation. | ✅ Pass |
+| **4. Altitude Streaming** | Climb / teleport character vertically across 5 bands. | `AAltitudeStreamingManager` dynamically loads/unloads bands at 1Hz based on player altitude. | Memory usage drops when out of range bands unload. SetReplicates(true) holds. | ✅ Pass |
+| **5. Role Assignment** | Client 1 runs `DebugSelectRole MALE`. Client 2 runs `DebugSelectRole FEMALE`. | Backend validates roles, auto-provisions player records, and saves choice in Oracle. | log: `PostSeasonRole SUCCESS (Code: 201)`. Records written to `player_season_roles`. | ✅ Pass |
+| **6. Share Event** | Client 1 runs `DebugRequestShare` within 500 units of Client 2. | Server validates proximity and rate limits, calls REST API, and inserts event in database. | log: `PostShareEvent SUCCESS (Code: 200)`. Row written to `share_events`. | ✅ Pass |
+| **7. Proximity / Anti-Cheat** | Move players >500 units apart; run `DebugRequestShare`. | Server proximity check rejects the request and logs error locally. | log: `Share request rejected: Players too far apart`. DB is NOT written. | ✅ Pass |
+| **8. Rate-Limiting Check** | Spam `DebugRequestShare` rapidly. | Server throttles requests within 1.0s. | log: `Share request rejected: Throttled (Rate Limit)`. | ✅ Pass |
+
+

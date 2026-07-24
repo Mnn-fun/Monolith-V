@@ -2,13 +2,13 @@
 
 > This file is the single source of truth for "where is this project right now." Any AI coding agent (Claude, Antigravity, GitHub Copilot, etc.) picking up this project cold should read this file FIRST, before opening any prompt file.
 
-**Last Completed Prompt ID:** P2.4
-**Current Phase:** Phase 2 — Core Architecture (Completed P2.4)
-**Last Updated:** 2026-07-21
+**Last Completed Prompt ID:** P2.12
+**Current Phase:** Phase 2 Complete (Core Architecture)
+**Last Updated:** 2026-07-24
 **Last Updated By:** Antigravity
 
 ## Next Prompt To Run
-`P2.5` in `PromptBook/02_Core_Architecture.md`
+`P3.1` in `PromptBook/03_Game_Development.md`
 
 ## Build Status
 - Unreal client: scaffolded, compiles offline and links cleanly (`UnrealEditor-MonolithV.dll`); GameMode sets `DefaultPawnClass = AMonolithVCharacter` and `PlayerControllerClass = AMonolithVPlayerController`; `AMonolithVCharacter` implements `IAbilitySystemInterface` with `UAbilitySystemComponent` (`ReplicationMode=Mixed`) and `UMonolithVAttributeSet` (`Health`, `MaxHealth`), dual-init `InitAbilityActorInfo` (`PossessedBy` on server, `OnRep_PlayerState` on client), Enhanced Input (`IA_Move`, `IA_Look`, `IA_TestAbility`, `IMC_Default`), `NetUpdateFrequency=30.f`, `MinNetUpdateFrequency=10.f`, `NetworkSmoothingMode=Exponential`, and visible TPP Cylinder avatar (`/Engine/BasicShapes/Cylinder.Cylinder`, `500.0f` spring arm); `UGA_TestAbility` and `UGE_TestDamage` implemented for GAS attribute verification. EOS subsystem confirmed live (`LogOnline: OSS: Created online subsystem instance for: EOS` / `Loaded subsystem for type [EOS]`).
