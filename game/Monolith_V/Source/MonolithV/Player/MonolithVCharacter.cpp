@@ -339,15 +339,64 @@ void AMonolithVCharacter::DebugRequestShare()
 
 void AMonolithVCharacter::ServerRequestShareItem_Implementation()
 {
-	// TODO Phase 3: Check distance/possession server-side here before talking to backend
-
 	if (UGameInstance* GI = GetGameInstance())
 	{
-		// Note: Include "Networking/BackendApiClient.h" at the top of the file
 		if (UBackendApiClient* ApiClient = GI->GetSubsystem<UBackendApiClient>())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("[Server] Calling BackendApiClient->PostShareEvent for %s"), *GetName());
-			ApiClient->PostShareEvent(TEXT("season_1"), TEXT("player_a"), TEXT("player_b"), TEXT("relic"), [this](bool bSuccess, bool bAlreadyShared)
+			FString GiverId = TEXT("unknown_giver");
+			FString ReceiverId = TEXT("unknown_receiver");
+			AMonolithVCharacter* ReceiverChar = nullptr;
+
+			// Dynamically find the Giver and Receiver from the PlayerControllers in the world
+			if (GetWorld())
+			{
+				for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+				{
+					APlayerController* PC = Iterator->Get();
+					if (PC)
+					{
+						FString PId = FString::Printf(TEXT("%s_%d"), *PC->GetName(), PC->GetUniqueID());
+						if (PC == GetController())
+						{
+							GiverId = PId;
+						}
+						else
+						{
+							ReceiverId = PId;
+							ReceiverChar = Cast<AMonolithVCharacter>(PC->GetPawn());
+						}
+					}
+				}
+			}
+
+			// Anti-Cheat Check 1: Rate Limit (1.0s)
+			if (GetWorld())
+			{
+				double CurrentTime = GetWorld()->GetTimeSeconds();
+				if (CurrentTime - LastShareRequestTime < 1.0)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("[Server] Share request rejected: Throttled (Rate Limit)"));
+					return;
+				}
+				LastShareRequestTime = CurrentTime;
+			}
+
+			// Anti-Cheat Check 2: Distance Check (max 500 units)
+			if (!ReceiverChar)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("[Server] Share request rejected: Receiver character not found"));
+				return;
+			}
+
+			float Distance = FVector::Dist(GetActorLocation(), ReceiverChar->GetActorLocation());
+			if (Distance > 500.0f)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("[Server] Share request rejected: Players too far apart (Distance: %f > 500)"), Distance);
+				return;
+			}
+
+			UE_LOG(LogTemp, Warning, TEXT("[Server] Calling BackendApiClient->PostShareEvent for Giver: %s, Receiver: %s"), *GiverId, *ReceiverId);
+			ApiClient->PostShareEvent(TEXT("season_1"), GiverId, ReceiverId, TEXT("GOLDEN_APPLE"), [this](bool bSuccess, bool bAlreadyShared)
 			{
 				if (bSuccess)
 				{

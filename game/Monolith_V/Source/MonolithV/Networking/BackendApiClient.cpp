@@ -124,3 +124,101 @@ void UBackendApiClient::OnCheckpointClaimResponseReceived(FHttpRequestPtr Reques
 		Callback(false, false);
 	}
 }
+
+void UBackendApiClient::GetSeasonRole(const FString& SeasonId, const FString& PlayerId, TFunction<void(bool bSuccess, const FString& Role)> Callback)
+{
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	
+	FString Url = FString::Printf(TEXT("%s/seasons/%s/players/%s/role"), *BackendBaseUrl, *SeasonId, *PlayerId);
+	Request->SetURL(Url);
+	Request->SetVerb(TEXT("GET"));
+
+	Request->OnProcessRequestComplete().BindUObject(this, &UBackendApiClient::OnGetSeasonRoleResponseReceived, Callback);
+	Request->ProcessRequest();
+}
+
+void UBackendApiClient::OnGetSeasonRoleResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, const FString&)> Callback)
+{
+	if (!bConnectedSuccessfully || !Response.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("[UBackendApiClient] GetSeasonRole failed to connect or response invalid."));
+		Callback(false, TEXT(""));
+		return;
+	}
+
+	int32 StatusCode = Response->GetResponseCode();
+	if (StatusCode == 200)
+	{
+		FString ResponseBody = Response->GetContentAsString();
+		TSharedPtr<FJsonObject> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseBody);
+
+		FString Role = TEXT("");
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		{
+			JsonObject->TryGetStringField(TEXT("role"), Role);
+		}
+
+		UE_LOG(LogTemp, Log, TEXT("[UBackendApiClient] GetSeasonRole SUCCESS (Role: %s)"), *Role);
+		Callback(true, Role);
+	}
+	else if (StatusCode == 404)
+	{
+		UE_LOG(LogTemp, Log, TEXT("[UBackendApiClient] GetSeasonRole returned 404 Not Found (Player has no role)."));
+		Callback(true, TEXT("")); // success=true, empty string means not found
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[UBackendApiClient] GetSeasonRole failed. Code: %d, Response: %s"), StatusCode, *Response->GetContentAsString());
+		Callback(false, TEXT(""));
+	}
+}
+
+void UBackendApiClient::PostSeasonRole(const FString& SeasonId, const FString& PlayerId, const FString& Role, TFunction<void(bool bSuccess, bool bAlreadyAssigned)> Callback)
+{
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	
+	FString Url = FString::Printf(TEXT("%s/seasons/%s/players/%s/role"), *BackendBaseUrl, *SeasonId, *PlayerId);
+	Request->SetURL(Url);
+	Request->SetVerb(TEXT("POST"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+
+	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
+	JsonObject->SetStringField(TEXT("role"), Role);
+
+	FString RequestBody;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&RequestBody);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+
+	Request->SetContentAsString(RequestBody);
+
+	Request->OnProcessRequestComplete().BindUObject(this, &UBackendApiClient::OnPostSeasonRoleResponseReceived, Callback);
+	Request->ProcessRequest();
+}
+
+void UBackendApiClient::OnPostSeasonRoleResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback)
+{
+	if (!bConnectedSuccessfully || !Response.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("[UBackendApiClient] PostSeasonRole failed to connect or response invalid."));
+		Callback(false, false);
+		return;
+	}
+
+	int32 StatusCode = Response->GetResponseCode();
+	if (StatusCode == 201)
+	{
+		UE_LOG(LogTemp, Log, TEXT("[UBackendApiClient] PostSeasonRole SUCCESS (Code: 201)."));
+		Callback(true, false);
+	}
+	else if (StatusCode == 409)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[UBackendApiClient] PostSeasonRole returned 409 Conflict (Role already assigned)."));
+		Callback(true, true);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[UBackendApiClient] PostSeasonRole failed. Code: %d, Response: %s"), StatusCode, *Response->GetContentAsString());
+		Callback(false, false);
+	}
+}

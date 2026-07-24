@@ -97,7 +97,7 @@ Monolith-V is a distributed software system comprising two tightly coupled but c
 
 ### 4.2 Security & Data Integrity
 - **`NFR-3` [Parameterized SQL Execution]:** All SQL queries within `OraclePlayerRepository` and related data access components shall utilize strict command parameterization (`OracleParameter`), totally preventing SQL injection vulnerabilities.
-- **`NFR-4` [Server-Authoritative Anti-Cheat Baseline]:** Client applications shall never possess trust for position teleportation, inventory generation, or damage assignment; all state changes must pass server-side bounds checking.
+- **`NFR-4` [Server-Authoritative Anti-Cheat Baseline]:** Client applications shall never possess trust for position teleportation, inventory generation, or damage assignment; all state changes must pass server-side bounds checking. Detailed enforcement rules are documented in the [Anti-Cheat Audit Log](file:///d:/techathons/Sem-7%20proj-seminar/Monolith-V/Docs/Architecture/AntiCheatAudit.md).
 - **`NFR-5` [Transport Layer Security]:** All communication between the ASP.NET Core backend and Oracle Cloud Autonomous Database shall be encrypted via TLS 1.2+ using mutual wallet authentication (`mTLS`).
 
 ### 4.3 Maintainability & Modular Architecture

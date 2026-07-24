@@ -21,6 +21,7 @@ builder.Services.AddScoped<MonolithV.Data.IPlayerRepository>(sp =>
     ));
 builder.Services.AddScoped<MonolithV.Data.IShareEventRepository, MonolithV.Data.ShareEventRepository>();
 builder.Services.AddScoped<MonolithV.Data.ICheckpointRepository, MonolithV.Data.CheckpointRepository>();
+builder.Services.AddScoped<MonolithV.Data.ISeasonRoleRepository, MonolithV.Data.SeasonRoleRepository>();
 
 var app = builder.Build();
 

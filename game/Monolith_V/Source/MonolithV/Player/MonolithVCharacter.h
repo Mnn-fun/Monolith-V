@@ -81,4 +81,7 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void OnTestAbilityPressed(const FInputActionValue& Value);
+
+private:
+	double LastShareRequestTime = 0.0;
 };

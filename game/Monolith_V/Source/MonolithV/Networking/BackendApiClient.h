@@ -29,10 +29,22 @@ public:
 	 */
 	void PostCheckpointClaim(const FString& SeasonId, const FString& PlayerId, int32 CheckpointIndex, TFunction<void(bool bSuccess, bool bAlreadyClaimed)> Callback);
 
+	/**
+	 * Async call to GET /seasons/{SeasonId}/players/{PlayerId}/role
+	 */
+	void GetSeasonRole(const FString& SeasonId, const FString& PlayerId, TFunction<void(bool bSuccess, const FString& Role)> Callback);
+
+	/**
+	 * Async call to POST /seasons/{SeasonId}/players/{PlayerId}/role
+	 */
+	void PostSeasonRole(const FString& SeasonId, const FString& PlayerId, const FString& Role, TFunction<void(bool bSuccess, bool bAlreadyAssigned)> Callback);
+
 private:
 	// Hardcoded for now. In a real project, read from an INI file.
 	FString BackendBaseUrl = TEXT("http://127.0.0.1:5054");
 
 	void OnShareEventResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback);
 	void OnCheckpointClaimResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback);
+	void OnGetSeasonRoleResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, const FString&)> Callback);
+	void OnPostSeasonRoleResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback);
 };
