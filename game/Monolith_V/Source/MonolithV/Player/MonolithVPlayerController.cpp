@@ -3,6 +3,8 @@
 #include "../Combat/MonolithVAttributeSet.h"
 #include "../Networking/BackendApiClient.h"
 #include "Engine/GameInstance.h"
+#include "Blueprint/UserWidget.h"
+#include "PlayerTypes.h"
 
 AMonolithVPlayerController::AMonolithVPlayerController()
 {
@@ -62,11 +64,17 @@ void AMonolithVPlayerController::BeginPlay()
 					{
 						UE_LOG(LogTemp, Log, TEXT("[Server] Player already has role: %s"), *FetchedRole);
 						bHasRoleAssigned = true;
+						
+						if (AMonolithVCharacter* MyChar = Cast<AMonolithVCharacter>(GetPawn()))
+						{
+							MyChar->CurrentRole = (FetchedRole == "MALE") ? EPlayerRole::Male : EPlayerRole::Female;
+						}
 					}
 					else
 					{
 						UE_LOG(LogTemp, Warning, TEXT("[Server] Player has NO role. Must call DebugSelectRole MALE or FEMALE."));
 						bHasRoleAssigned = false;
+						ClientShowRoleSelection();
 					}
 				});
 			}
@@ -99,12 +107,18 @@ void AMonolithVPlayerController::ServerSubmitRoleChoice_Implementation(const FSt
 			FString PlayerId = FString::Printf(TEXT("%s_%d"), *GetName(), GetUniqueID());
 
 			UE_LOG(LogTemp, Log, TEXT("[Server] Submitting role %s for %s"), *ChosenRole, *PlayerId);
-			BackendClient->PostSeasonRole(SeasonId, PlayerId, ChosenRole, [this](bool bSuccess, bool bAlreadyAssigned)
+			BackendClient->PostSeasonRole(SeasonId, PlayerId, ChosenRole, [this, ChosenRole](bool bSuccess, bool bAlreadyAssigned)
 			{
 				if (bSuccess)
 				{
 					bHasRoleAssigned = true;
 					UE_LOG(LogTemp, Log, TEXT("[Server] Role successfully assigned in backend!"));
+					
+					if (AMonolithVCharacter* MyChar = Cast<AMonolithVCharacter>(GetPawn()))
+					{
+						MyChar->CurrentRole = (ChosenRole == "MALE") ? EPlayerRole::Male : EPlayerRole::Female;
+					}
+					ClientHideRoleSelection();
 				}
 				else
 				{
@@ -118,4 +132,36 @@ void AMonolithVPlayerController::ServerSubmitRoleChoice_Implementation(const FSt
 bool AMonolithVPlayerController::ServerSubmitRoleChoice_Validate(const FString& ChosenRole)
 {
 	return true;
+}
+
+void AMonolithVPlayerController::ClientShowRoleSelection_Implementation()
+{
+	if (RoleSelectWidgetClass)
+	{
+		if (!RoleSelectWidgetInstance)
+		{
+			RoleSelectWidgetInstance = CreateWidget<UUserWidget>(this, RoleSelectWidgetClass);
+		}
+
+		if (RoleSelectWidgetInstance && !RoleSelectWidgetInstance->IsInViewport())
+		{
+			RoleSelectWidgetInstance->AddToViewport();
+			bShowMouseCursor = true;
+			SetInputMode(FInputModeUIOnly());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ClientShowRoleSelection called, but RoleSelectWidgetClass is not assigned in the PlayerController blueprint!"));
+	}
+}
+
+void AMonolithVPlayerController::ClientHideRoleSelection_Implementation()
+{
+	if (RoleSelectWidgetInstance && RoleSelectWidgetInstance->IsInViewport())
+	{
+		RoleSelectWidgetInstance->RemoveFromParent();
+		bShowMouseCursor = false;
+		SetInputMode(FInputModeGameOnly());
+	}
 }

@@ -316,6 +316,7 @@ void AMonolithVCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AMonolithVCharacter, bDebugShareConfirmed);
+	DOREPLIFETIME(AMonolithVCharacter, CurrentRole);
 }
 
 void AMonolithVCharacter::OnRep_DebugShareConfirmed()

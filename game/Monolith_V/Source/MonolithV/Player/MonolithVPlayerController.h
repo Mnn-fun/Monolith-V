@@ -4,6 +4,8 @@
 #include "GameFramework/PlayerController.h"
 #include "MonolithVPlayerController.generated.h"
 
+class UUserWidget;
+
 UCLASS()
 class MONOLITHV_API AMonolithVPlayerController : public APlayerController
 {
@@ -30,6 +32,19 @@ public:
 	// Server-side RPC to submit the role choice to backend
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerSubmitRoleChoice(const FString& ChosenRole);
+
+	UFUNCTION(Client, Reliable)
+	void ClientShowRoleSelection();
+
+	UFUNCTION(Client, Reliable)
+	void ClientHideRoleSelection();
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> RoleSelectWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* RoleSelectWidgetInstance;
 
 private:
 	bool bHasRoleAssigned = false;

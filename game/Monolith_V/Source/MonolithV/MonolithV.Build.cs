@@ -25,7 +25,10 @@ public class MonolithV : ModuleRules
 			"OnlineSubsystemUtils",
 			"HTTP",
 			"Json",
-			"JsonUtilities"
+			"JsonUtilities",
+			"UMG",
+			"Slate",
+			"SlateCore"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "AbilitySystemInterface.h"
+#include "PlayerTypes.h"
 #include "MonolithVCharacter.generated.h"
 
 class UInputMappingContext;
@@ -32,6 +33,9 @@ public:
 
 	UPROPERTY(ReplicatedUsing=OnRep_DebugShareConfirmed, BlueprintReadOnly, Category = "Networking")
 	bool bDebugShareConfirmed;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Role")
+	EPlayerRole CurrentRole = EPlayerRole::None;
 
 	UFUNCTION()
 	void OnRep_DebugShareConfirmed();
