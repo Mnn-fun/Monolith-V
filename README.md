@@ -40,12 +40,6 @@ Monolith-V/
 │   └── workflows/
 │       └── ci.yml                  # Build-check CI (Unreal compile + backend build/test)
 │
-├── PromptBook/
-│   ├── 01_Project_Foundation.md
-│   ├── 02_Core_Architecture.md
-│   ├── 03_Game_Development.md
-│   ├── 04_Optimization_Testing.md
-│   └── 05_Deployment_and_Publishing.md
 │
 ├── Game/                           # Unreal Engine 5 project
 │   ├── MonolithV.uproject
