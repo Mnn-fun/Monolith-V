@@ -74,6 +74,12 @@ public class ShareEventConcurrencyTests
                 _semaphore.Release();
             }
         }
+
+        public Task<bool> HasPlayerSharedAsync(string seasonId, string playerId, CancellationToken cancellationToken = default)
+        {
+            // Dummy implementation for the mock to satisfy the interface
+            return Task.FromResult(false);
+        }
     }
 
     [Fact]
