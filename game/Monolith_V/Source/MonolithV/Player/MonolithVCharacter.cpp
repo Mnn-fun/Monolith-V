@@ -18,7 +18,10 @@
 #include "Engine/GameInstance.h"
 #include "../Combat/RoleItemComponent.h"
 #include "../Combat/GE_ShareHealthBoost.h"
-
+#include "../Combat/GA_Jetpack.h"
+#include "../Combat/GE_FuelRegen.h"
+#include "../Combat/WeaponComponent.h"
+#include "../Combat/GA_FireWeapon.h"
 AMonolithVCharacter::AMonolithVCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -59,6 +62,7 @@ AMonolithVCharacter::AMonolithVCharacter()
 	TestAbilityClass = UGA_TestAbility::StaticClass();
 
 	RoleItemComponent = CreateDefaultSubobject<URoleItemComponent>(TEXT("RoleItemComponent"));
+	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
 
 	// Create a visual mesh so characters are visible to each other in multiplayer sessions
 	VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualMesh"));
@@ -262,6 +266,22 @@ void AMonolithVCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ShareItemAction is NULL on %s! Cannot bind OnShareItemPressed!"), *GetName());
 		}
+
+		if (JetpackAction)
+		{
+			EnhancedInputComponent->BindAction(JetpackAction, ETriggerEvent::Started, this, &AMonolithVCharacter::OnJetpackPressed);
+			EnhancedInputComponent->BindAction(JetpackAction, ETriggerEvent::Completed, this, &AMonolithVCharacter::OnJetpackReleased);
+		}
+
+		if (FireAction)
+		{
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AMonolithVCharacter::OnFirePressed);
+		}
+
+		if (ReloadAction)
+		{
+			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &AMonolithVCharacter::OnReloadPressed);
+		}
 	}
 }
 
@@ -308,8 +328,69 @@ void AMonolithVCharacter::OnTestAbilityPressed(const FInputActionValue& Value)
 
 void AMonolithVCharacter::OnShareItemPressed(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("[Client] OnShareItemPressed - Requesting Share Item..."));
-	ServerRequestShareItem();
+	if (IsLocallyControlled())
+	{
+		double CurrentTime = FPlatformTime::Seconds();
+		if (CurrentTime - LastShareRequestTime > 1.0)
+		{
+			LastShareRequestTime = CurrentTime;
+			UE_LOG(LogTemp, Warning, TEXT("[Client] OnShareItemPressed - Requesting Share Item..."));
+			ServerRequestShareItem();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[Client] OnShareItemPressed - Request throttled"));
+		}
+	}
+}
+
+void AMonolithVCharacter::OnJetpackPressed(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->TryActivateAbilityByClass(UGA_Jetpack::StaticClass(), true);
+	}
+}
+
+void AMonolithVCharacter::OnJetpackReleased(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent)
+	{
+		FGameplayAbilitySpec* Spec = AbilitySystemComponent->FindAbilitySpecFromClass(UGA_Jetpack::StaticClass());
+		if (Spec && Spec->IsActive())
+		{
+			AbilitySystemComponent->CancelAbilityHandle(Spec->Handle);
+		}
+	}
+}
+
+void AMonolithVCharacter::OnFirePressed(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->TryActivateAbilityByClass(UGA_FireWeapon::StaticClass(), true);
+	}
+}
+
+void AMonolithVCharacter::OnReloadPressed(const FInputActionValue& Value)
+{
+	if (IsLocallyControlled())
+	{
+		ServerReload();
+	}
+}
+
+bool AMonolithVCharacter::ServerReload_Validate()
+{
+	return true;
+}
+
+void AMonolithVCharacter::ServerReload_Implementation()
+{
+	if (WeaponComponent)
+	{
+		WeaponComponent->Reload();
+	}
 }
 
 void AMonolithVCharacter::PossessedBy(AController* NewController)
@@ -321,9 +402,21 @@ void AMonolithVCharacter::PossessedBy(AController* NewController)
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
 		UE_LOG(LogTemp, Warning, TEXT("AMonolithVCharacter::PossessedBy - InitAbilityActorInfo called on Server for %s"), *GetName());
 
-		if (HasAuthority() && TestAbilityClass)
+		if (HasAuthority() && AbilitySystemComponent)
 		{
-			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(TestAbilityClass, 1, 0, this));
+			// Grant test ability
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(UGA_TestAbility::StaticClass(), 1, 0));
+			
+			// Grant jetpack ability
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(UGA_Jetpack::StaticClass(), 1, 0));
+
+			// Grant fire weapon ability
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(UGA_FireWeapon::StaticClass(), 1, 0));
+
+			// Apply infinite fuel regen
+			const UGameplayEffect* RegenEffectCDO = UGE_FuelRegen::StaticClass()->GetDefaultObject<UGameplayEffect>();
+			AbilitySystemComponent->ApplyGameplayEffectToSelf(RegenEffectCDO, 1.0f, AbilitySystemComponent->MakeEffectContext());
+
 			UE_LOG(LogTemp, Warning, TEXT("AMonolithVCharacter::PossessedBy - Granted TestAbilityClass %s to %s"), *TestAbilityClass->GetName(), *GetName());
 		}
 	}
@@ -382,6 +475,31 @@ void AMonolithVCharacter::ClientShowShareGateWarning_Implementation()
 void AMonolithVCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Display fuel debug gauge
+	if (IsLocallyControlled() && AbilitySystemComponent)
+	{
+		bool bFound = false;
+		float CurrentFuel = AbilitySystemComponent->GetGameplayAttributeValue(UMonolithVAttributeSet::GetFuelAttribute(), bFound);
+		float MaxFuel = AbilitySystemComponent->GetGameplayAttributeValue(UMonolithVAttributeSet::GetMaxFuelAttribute(), bFound);
+		if (bFound)
+		{
+			FString FuelMsg = FString::Printf(TEXT("JETPACK FUEL: %.0f / %.0f"), CurrentFuel, MaxFuel);
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(1001, 0.0f, FColor::Cyan, FuelMsg);
+			}
+		}
+
+		if (WeaponComponent)
+		{
+			FString AmmoMsg = FString::Printf(TEXT("AMMO: %d / %d"), WeaponComponent->Ammo, WeaponComponent->MaxAmmo);
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(1002, 0.0f, FColor::Orange, AmmoMsg);
+			}
+		}
+	}
 
 	if (IsLocallyControlled() && RoleItemComponent && RoleItemComponent->bItemAvailable && CurrentRole != EPlayerRole::None)
 	{

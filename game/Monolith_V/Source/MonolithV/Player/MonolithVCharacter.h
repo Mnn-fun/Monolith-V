@@ -75,6 +75,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* VisualMesh;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	class UWeaponComponent* WeaponComponent;
+
 	// Enhanced Input mapping context and actions
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
@@ -91,11 +94,29 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* ShareItemAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* JetpackAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* FireAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* ReloadAction;
+
 	// Enhanced Input callback handlers
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void OnTestAbilityPressed(const FInputActionValue& Value);
 	void OnShareItemPressed(const FInputActionValue& Value);
+	
+	void OnJetpackPressed(const FInputActionValue& Value);
+	void OnJetpackReleased(const FInputActionValue& Value);
+
+	void OnFirePressed(const FInputActionValue& Value);
+	void OnReloadPressed(const FInputActionValue& Value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerReload();
 
 private:
 	double LastShareRequestTime = 0.0;

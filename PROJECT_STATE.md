@@ -2,13 +2,20 @@
 
 > This file is the single source of truth for "where is this project right now." Any AI coding agent (Claude, Antigravity, GitHub Copilot, etc.) picking up this project cold should read this file FIRST, before opening any prompt file.
 
-**Last Completed Prompt ID:** P2.12
-**Current Phase:** Phase 2 Complete (Core Architecture)
-**Last Updated:** 2026-07-24
+- [x] **P3.1:** First Level Layout (10 Altitude Bands Blockout)
+- [x] **P3.2:** Cooperative Setup (Role Select & Persistent UI)
+- [x] **P3.3:** Share-Gated Checkpoint Mechanic
+- [x] **P3.4:** Jetpack Traversal Ability
+- [x] **P3.5:** Ranged Weapon System
+- [ ] **P3.6:** Secondary Combat Ability (Dash-Attack)
+
+**Last Completed Prompt ID:** P3.5
+**Current Phase:** Phase 3 (Core Networked Gameplay Mechanics)
+**Last Updated:** 2026-07-30
 **Last Updated By:** Antigravity
 
 ## Next Prompt To Run
-`P3.1` in `PromptBook/03_Game_Development.md`
+`P3.4` in `PromptBook/03_Game_Development.md`
 
 ## Build Status
 - Unreal client: scaffolded, compiles offline and links cleanly (`UnrealEditor-MonolithV.dll`); GameMode sets `DefaultPawnClass = AMonolithVCharacter` and `PlayerControllerClass = AMonolithVPlayerController`; `AMonolithVCharacter` implements `IAbilitySystemInterface` with `UAbilitySystemComponent` (`ReplicationMode=Mixed`) and `UMonolithVAttributeSet` (`Health`, `MaxHealth`), dual-init `InitAbilityActorInfo` (`PossessedBy` on server, `OnRep_PlayerState` on client), Enhanced Input (`IA_Move`, `IA_Look`, `IA_TestAbility`, `IMC_Default`), `NetUpdateFrequency=30.f`, `MinNetUpdateFrequency=10.f`, `NetworkSmoothingMode=Exponential`, and visible TPP Cylinder avatar (`/Engine/BasicShapes/Cylinder.Cylinder`, `500.0f` spring arm); `UGA_TestAbility` and `UGE_TestDamage` implemented for GAS attribute verification. EOS subsystem confirmed live (`LogOnline: OSS: Created online subsystem instance for: EOS` / `Loaded subsystem for type [EOS]`).
@@ -46,6 +53,11 @@
 - `Infra/oracle/README.md` — Oracle Autonomous Database wallet directory setup, TNS alias guide (`_medium`), and environment variable reference
 - `Infra/oracle/schema/V1__init_schema.sql` — V1 DDL schema creation script (`PLAYERS`, `SEASONS`, `PLAYER_SEASON_ROLES`, `SHARE_EVENTS`, `CHECKPOINT_PROGRESS`)
 - `Docs/Architecture/ER_Diagram.md` — Mermaid `erDiagram` block and table constraint definitions
+- `game/Monolith_V/Source/MonolithV/UI/RoleSelectWidget.h/.cpp` — UMG widget for role selection
+- `game/Monolith_V/Source/MonolithV/Combat/RoleItemComponent.h/.cpp` — Manages shareable items logic
+- `game/Monolith_V/Source/MonolithV/World/ShareGateActor.h/.cpp` — Gate that checks backend for share status before unlocking
+- `Backend/MonolithV.Api/Controllers/ShareEventsController.cs` — Added POST and GET endpoints for share events
+- `Backend/MonolithV.Data/ShareEventRepository.cs` — Implemented async database queries for share events
 
 ## Known Issues / Open TODOs
 - Path/naming drift: PromptBook references `Game/MonolithV.uproject`; actual path is `game/Monolith_V/Monolith_V.uproject` (lowercase folder, underscore in project name).
