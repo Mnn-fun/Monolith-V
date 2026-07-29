@@ -367,8 +367,15 @@ void AMonolithVCharacter::DebugRequestShare()
 {
 	if (IsLocallyControlled())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[Client] Requesting Share Item..."));
 		ServerRequestShareItem();
+	}
+}
+
+void AMonolithVCharacter::ClientShowShareGateWarning_Implementation()
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("You must share your item with an ally before passing!"));
 	}
 }
 

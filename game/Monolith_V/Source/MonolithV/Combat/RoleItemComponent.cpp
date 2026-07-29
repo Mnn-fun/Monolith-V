@@ -28,7 +28,7 @@ FString URoleItemComponent::GetItemType(EPlayerRole Role) const
 	}
 	else if (Role == EPlayerRole::Female)
 	{
-		return TEXT("SILVER_BLOSSOM");
+		return TEXT("COUNTERPART_ITEM");
 	}
 	return TEXT("UNKNOWN");
 }

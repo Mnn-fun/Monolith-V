@@ -20,6 +20,11 @@ public interface IShareEventRepository
         string receiverPlayerId,
         string itemType,
         CancellationToken cancellationToken = default);
+
+    Task<bool> HasPlayerSharedAsync(
+        string seasonId,
+        string playerId,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -160,5 +165,30 @@ public class ShareEventRepository : IShareEventRepository
             current = current.InnerException;
         }
         return false;
+    }
+
+    public async Task<bool> HasPlayerSharedAsync(
+        string seasonId,
+        string playerId,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(seasonId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(playerId);
+
+        await using var connection = await _connectionFactory.CreateOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT 1 
+            FROM share_events 
+            WHERE season_id = :seasonId 
+              AND (giver_player_id = :playerId OR receiver_player_id = :playerId)
+            FETCH FIRST 1 ROWS ONLY";
+
+        command.Parameters.Add(new OracleParameter("seasonId", OracleDbType.Varchar2, seasonId, ParameterDirection.Input));
+        command.Parameters.Add(new OracleParameter("playerId", OracleDbType.Varchar2, playerId, ParameterDirection.Input));
+
+        var result = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
+        return result != null;
     }
 }

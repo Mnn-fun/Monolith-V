@@ -50,6 +50,9 @@ public:
 	UFUNCTION(Exec)
 	void DebugRequestShare();
 
+	UFUNCTION(Client, Reliable)
+	void ClientShowShareGateWarning();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
 	UAbilitySystemComponent* AbilitySystemComponent;
 
