@@ -85,10 +85,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* TestAbilityAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* ShareItemAction;
+
 	// Enhanced Input callback handlers
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void OnTestAbilityPressed(const FInputActionValue& Value);
+	void OnShareItemPressed(const FInputActionValue& Value);
 
 private:
 	double LastShareRequestTime = 0.0;

@@ -150,6 +150,20 @@ AMonolithVCharacter::AMonolithVCharacter()
 			TestAbilityAction = TestAbilityAssetSub.Object;
 		}
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> ShareItemAsset(TEXT("/Game/IA_ShareItem.IA_ShareItem"));
+	if (ShareItemAsset.Succeeded())
+	{
+		ShareItemAction = ShareItemAsset.Object;
+	}
+	else
+	{
+		static ConstructorHelpers::FObjectFinder<UInputAction> ShareItemAssetSub(TEXT("/Game/Input/IA_ShareItem.IA_ShareItem"));
+		if (ShareItemAssetSub.Succeeded())
+		{
+			ShareItemAction = ShareItemAssetSub.Object;
+		}
+	}
 }
 
 void AMonolithVCharacter::BeginPlay()
@@ -239,6 +253,15 @@ void AMonolithVCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		{
 			UE_LOG(LogTemp, Warning, TEXT("TestAbilityAction is NULL on %s! Cannot bind OnTestAbilityPressed!"), *GetName());
 		}
+
+		if (ShareItemAction)
+		{
+			EnhancedInputComponent->BindAction(ShareItemAction, ETriggerEvent::Started, this, &AMonolithVCharacter::OnShareItemPressed);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ShareItemAction is NULL on %s! Cannot bind OnShareItemPressed!"), *GetName());
+		}
 	}
 }
 
@@ -281,6 +304,12 @@ void AMonolithVCharacter::OnTestAbilityPressed(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Warning, TEXT("AMonolithVCharacter::OnTestAbilityPressed on %s - TryActivateAbilityByClass(%s)"), *GetName(), *TestAbilityClass->GetName());
 		AbilitySystemComponent->TryActivateAbilityByClass(TestAbilityClass);
 	}
+}
+
+void AMonolithVCharacter::OnShareItemPressed(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[Client] OnShareItemPressed - Requesting Share Item..."));
+	ServerRequestShareItem();
 }
 
 void AMonolithVCharacter::PossessedBy(AController* NewController)
@@ -466,17 +495,27 @@ void AMonolithVCharacter::ServerRequestShareItem_Implementation()
 						this->RoleItemComponent->bItemAvailable = false;
 					}
 
-					// Apply GameplayEffect to both
-					UGameplayEffect* GEInstance = NewObject<UGE_ShareHealthBoost>(GetTransientPackage(), UGE_ShareHealthBoost::StaticClass());
+					// Apply GameplayEffect to both using the CDO
+					const UGameplayEffect* GEDefault = UGE_ShareHealthBoost::StaticClass()->GetDefaultObject<UGE_ShareHealthBoost>();
 					
-					if (this->AbilitySystemComponent)
+					if (this->AbilitySystemComponent && GEDefault)
 					{
-						this->AbilitySystemComponent->ApplyGameplayEffectToSelf(GEInstance, 1.0f, this->AbilitySystemComponent->MakeEffectContext());
+						FGameplayEffectContextHandle EffectContext = this->AbilitySystemComponent->MakeEffectContext();
+						FGameplayEffectSpecHandle SpecHandle = this->AbilitySystemComponent->MakeOutgoingSpec(UGE_ShareHealthBoost::StaticClass(), 1.0f, EffectContext);
+						if (SpecHandle.IsValid())
+						{
+							this->AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+						}
 					}
 					
-					if (ReceiverChar && ReceiverChar->AbilitySystemComponent)
+					if (ReceiverChar && ReceiverChar->AbilitySystemComponent && GEDefault)
 					{
-						ReceiverChar->AbilitySystemComponent->ApplyGameplayEffectToSelf(GEInstance, 1.0f, ReceiverChar->AbilitySystemComponent->MakeEffectContext());
+						FGameplayEffectContextHandle EffectContext = ReceiverChar->AbilitySystemComponent->MakeEffectContext();
+						FGameplayEffectSpecHandle SpecHandle = ReceiverChar->AbilitySystemComponent->MakeOutgoingSpec(UGE_ShareHealthBoost::StaticClass(), 1.0f, EffectContext);
+						if (SpecHandle.IsValid())
+						{
+							ReceiverChar->AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+						}
 					}
 
 					UE_LOG(LogTemp, Warning, TEXT("[Server] PostShareEvent succeeded! Buffs applied."));
