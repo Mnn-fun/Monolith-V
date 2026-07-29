@@ -6,6 +6,8 @@
 UMonolithVAttributeSet::UMonolithVAttributeSet()
 	: Health(100.0f)
 	, MaxHealth(100.0f)
+	, Fuel(100.0f)
+	, MaxFuel(100.0f)
 {
 }
 
@@ -15,6 +17,8 @@ void UMonolithVAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 
 	DOREPLIFETIME_CONDITION_NOTIFY(UMonolithVAttributeSet, Health, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UMonolithVAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UMonolithVAttributeSet, Fuel, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UMonolithVAttributeSet, MaxFuel, COND_None, REPNOTIFY_Always);
 }
 
 void UMonolithVAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth)
@@ -27,6 +31,16 @@ void UMonolithVAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMa
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UMonolithVAttributeSet, MaxHealth, OldMaxHealth);
 }
 
+void UMonolithVAttributeSet::OnRep_Fuel(const FGameplayAttributeData& OldFuel)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UMonolithVAttributeSet, Fuel, OldFuel);
+}
+
+void UMonolithVAttributeSet::OnRep_MaxFuel(const FGameplayAttributeData& OldMaxFuel)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UMonolithVAttributeSet, MaxFuel, OldMaxFuel);
+}
+
 void UMonolithVAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
@@ -34,6 +48,10 @@ void UMonolithVAttributeSet::PreAttributeChange(const FGameplayAttribute& Attrib
 	if (Attribute == GetHealthAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.0f, GetMaxHealth());
+	}
+	else if (Attribute == GetFuelAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.0f, GetMaxFuel());
 	}
 }
 
@@ -45,5 +63,9 @@ void UMonolithVAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	{
 		SetHealth(FMath::Clamp(GetHealth(), 0.0f, GetMaxHealth()));
 		UE_LOG(LogTemp, Warning, TEXT("UMonolithVAttributeSet::PostGameplayEffectExecute - Health changed to: %f on %s"), GetHealth(), *GetOuter()->GetName());
+	}
+	else if (Data.EvaluatedData.Attribute == GetFuelAttribute())
+	{
+		SetFuel(FMath::Clamp(GetFuel(), 0.0f, GetMaxFuel()));
 	}
 }

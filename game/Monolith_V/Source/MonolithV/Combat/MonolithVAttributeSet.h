@@ -36,4 +36,18 @@ public:
 
 	UFUNCTION()
 	virtual void OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth);
+
+	UPROPERTY(BlueprintReadOnly, Category = "Fuel", ReplicatedUsing = OnRep_Fuel)
+	FGameplayAttributeData Fuel;
+	ATTRIBUTE_ACCESSORS(UMonolithVAttributeSet, Fuel)
+
+	UPROPERTY(BlueprintReadOnly, Category = "Fuel", ReplicatedUsing = OnRep_MaxFuel)
+	FGameplayAttributeData MaxFuel;
+	ATTRIBUTE_ACCESSORS(UMonolithVAttributeSet, MaxFuel)
+
+	UFUNCTION()
+	virtual void OnRep_Fuel(const FGameplayAttributeData& OldFuel);
+
+	UFUNCTION()
+	virtual void OnRep_MaxFuel(const FGameplayAttributeData& OldMaxFuel);
 };
