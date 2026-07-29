@@ -16,9 +16,12 @@
 #include "../Combat/GA_TestAbility.h"
 #include "../Networking/BackendApiClient.h"
 #include "Engine/GameInstance.h"
+#include "../Combat/RoleItemComponent.h"
+#include "../Combat/GE_ShareHealthBoost.h"
 
 AMonolithVCharacter::AMonolithVCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
 	// Don't rotate character when controller rotates. Let that just affect the camera/look.
@@ -54,6 +57,8 @@ AMonolithVCharacter::AMonolithVCharacter()
 	AttributeSet = CreateDefaultSubobject<UMonolithVAttributeSet>(TEXT("AttributeSet"));
 
 	TestAbilityClass = UGA_TestAbility::StaticClass();
+
+	RoleItemComponent = CreateDefaultSubobject<URoleItemComponent>(TEXT("RoleItemComponent"));
 
 	// Create a visual mesh so characters are visible to each other in multiplayer sessions
 	VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualMesh"));
@@ -145,6 +150,20 @@ AMonolithVCharacter::AMonolithVCharacter()
 			TestAbilityAction = TestAbilityAssetSub.Object;
 		}
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> ShareItemAsset(TEXT("/Game/IA_ShareItem.IA_ShareItem"));
+	if (ShareItemAsset.Succeeded())
+	{
+		ShareItemAction = ShareItemAsset.Object;
+	}
+	else
+	{
+		static ConstructorHelpers::FObjectFinder<UInputAction> ShareItemAssetSub(TEXT("/Game/Input/IA_ShareItem.IA_ShareItem"));
+		if (ShareItemAssetSub.Succeeded())
+		{
+			ShareItemAction = ShareItemAssetSub.Object;
+		}
+	}
 }
 
 void AMonolithVCharacter::BeginPlay()
@@ -234,6 +253,15 @@ void AMonolithVCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		{
 			UE_LOG(LogTemp, Warning, TEXT("TestAbilityAction is NULL on %s! Cannot bind OnTestAbilityPressed!"), *GetName());
 		}
+
+		if (ShareItemAction)
+		{
+			EnhancedInputComponent->BindAction(ShareItemAction, ETriggerEvent::Started, this, &AMonolithVCharacter::OnShareItemPressed);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ShareItemAction is NULL on %s! Cannot bind OnShareItemPressed!"), *GetName());
+		}
 	}
 }
 
@@ -276,6 +304,12 @@ void AMonolithVCharacter::OnTestAbilityPressed(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Warning, TEXT("AMonolithVCharacter::OnTestAbilityPressed on %s - TryActivateAbilityByClass(%s)"), *GetName(), *TestAbilityClass->GetName());
 		AbilitySystemComponent->TryActivateAbilityByClass(TestAbilityClass);
 	}
+}
+
+void AMonolithVCharacter::OnShareItemPressed(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[Client] OnShareItemPressed - Requesting Share Item..."));
+	ServerRequestShareItem();
 }
 
 void AMonolithVCharacter::PossessedBy(AController* NewController)
@@ -338,6 +372,43 @@ void AMonolithVCharacter::DebugRequestShare()
 	}
 }
 
+void AMonolithVCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (IsLocallyControlled() && RoleItemComponent && RoleItemComponent->bItemAvailable && CurrentRole != EPlayerRole::None)
+	{
+		// Find nearby players of opposite role
+		if (GetWorld())
+		{
+			for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+			{
+				APlayerController* PC = Iterator->Get();
+				if (PC && PC != GetController())
+				{
+					if (AMonolithVCharacter* OtherChar = Cast<AMonolithVCharacter>(PC->GetPawn()))
+					{
+						if (OtherChar->CurrentRole != EPlayerRole::None && OtherChar->CurrentRole != CurrentRole)
+						{
+							float Distance = FVector::Dist(GetActorLocation(), OtherChar->GetActorLocation());
+							if (Distance <= 500.0f)
+							{
+								FString ItemName = RoleItemComponent->GetItemType(CurrentRole);
+								FString Msg = FString::Printf(TEXT("Press [Middle Mouse Button] to share %s with %s"), *ItemName, *PC->GetName());
+								if (GEngine)
+								{
+									GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, Msg);
+								}
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void AMonolithVCharacter::ServerRequestShareItem_Implementation()
 {
 	if (UGameInstance* GI = GetGameInstance())
@@ -382,13 +453,21 @@ void AMonolithVCharacter::ServerRequestShareItem_Implementation()
 				LastShareRequestTime = CurrentTime;
 			}
 
-			// Anti-Cheat Check 2: Distance Check (max 500 units)
+			// Anti-Cheat Check 2: Item Availability Check
+			if (!RoleItemComponent || !RoleItemComponent->bItemAvailable)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("[Server] Share request rejected: Item not available"));
+				return;
+			}
+
+			// Anti-Cheat Check 3: Receiver validation
 			if (!ReceiverChar)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("[Server] Share request rejected: Receiver character not found"));
 				return;
 			}
 
+			// Anti-Cheat Check 4: Distance Check (max 500 units)
 			float Distance = FVector::Dist(GetActorLocation(), ReceiverChar->GetActorLocation());
 			if (Distance > 500.0f)
 			{
@@ -396,15 +475,54 @@ void AMonolithVCharacter::ServerRequestShareItem_Implementation()
 				return;
 			}
 
-			UE_LOG(LogTemp, Warning, TEXT("[Server] Calling BackendApiClient->PostShareEvent for Giver: %s, Receiver: %s"), *GiverId, *ReceiverId);
-			ApiClient->PostShareEvent(TEXT("season_1"), GiverId, ReceiverId, TEXT("GOLDEN_APPLE"), [this](bool bSuccess, bool bAlreadyShared)
+			// Anti-Cheat Check 5: Opposite Role Check
+			if (CurrentRole == EPlayerRole::None || ReceiverChar->CurrentRole == EPlayerRole::None || CurrentRole == ReceiverChar->CurrentRole)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("[Server] Share request rejected: Invalid roles for sharing"));
+				return;
+			}
+
+			FString ItemType = RoleItemComponent->GetItemType(CurrentRole);
+
+			UE_LOG(LogTemp, Warning, TEXT("[Server] Calling BackendApiClient->PostShareEvent for Giver: %s, Receiver: %s, Item: %s"), *GiverId, *ReceiverId, *ItemType);
+			ApiClient->PostShareEvent(TEXT("season_1"), GiverId, ReceiverId, ItemType, [this, ReceiverChar](bool bSuccess, bool bAlreadyShared)
 			{
 				if (bSuccess)
 				{
-					this->bDebugShareConfirmed = true;
-					// Force a net update so clients see it immediately
-					this->ForceNetUpdate();
-					UE_LOG(LogTemp, Warning, TEXT("[Server] PostShareEvent succeeded. Replicating bDebugShareConfirmed=true to clients."));
+					// Mark item consumed
+					if (this->RoleItemComponent)
+					{
+						this->RoleItemComponent->bItemAvailable = false;
+					}
+
+					// Apply GameplayEffect to both using the CDO
+					const UGameplayEffect* GEDefault = UGE_ShareHealthBoost::StaticClass()->GetDefaultObject<UGE_ShareHealthBoost>();
+					
+					if (this->AbilitySystemComponent && GEDefault)
+					{
+						FGameplayEffectContextHandle EffectContext = this->AbilitySystemComponent->MakeEffectContext();
+						FGameplayEffectSpecHandle SpecHandle = this->AbilitySystemComponent->MakeOutgoingSpec(UGE_ShareHealthBoost::StaticClass(), 1.0f, EffectContext);
+						if (SpecHandle.IsValid())
+						{
+							this->AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+						}
+					}
+					
+					if (ReceiverChar && ReceiverChar->AbilitySystemComponent && GEDefault)
+					{
+						FGameplayEffectContextHandle EffectContext = ReceiverChar->AbilitySystemComponent->MakeEffectContext();
+						FGameplayEffectSpecHandle SpecHandle = ReceiverChar->AbilitySystemComponent->MakeOutgoingSpec(UGE_ShareHealthBoost::StaticClass(), 1.0f, EffectContext);
+						if (SpecHandle.IsValid())
+						{
+							ReceiverChar->AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+						}
+					}
+
+					UE_LOG(LogTemp, Warning, TEXT("[Server] PostShareEvent succeeded! Buffs applied."));
+				}
+				else if (bAlreadyShared)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("[Server] PostShareEvent failed: Already shared."));
 				}
 				else
 				{
