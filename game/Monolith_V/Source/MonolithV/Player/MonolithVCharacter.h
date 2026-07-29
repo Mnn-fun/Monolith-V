@@ -26,10 +26,14 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Role Item")
+	class URoleItemComponent* RoleItemComponent;
 
 	UPROPERTY(ReplicatedUsing=OnRep_DebugShareConfirmed, BlueprintReadOnly, Category = "Networking")
 	bool bDebugShareConfirmed;
