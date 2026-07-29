@@ -58,4 +58,19 @@ public class ShareEventsController : ControllerBase
             message = result.Message
         });
     }
+
+    [HttpGet("~/seasons/{seasonId}/players/{playerId}/has-shared")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetHasShared(string seasonId, string playerId, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(seasonId) || string.IsNullOrWhiteSpace(playerId))
+        {
+            return BadRequest(new { error = "Both seasonId and playerId are required." });
+        }
+
+        var hasShared = await _repository.HasPlayerSharedAsync(seasonId, playerId, cancellationToken).ConfigureAwait(false);
+
+        return Ok(new { hasShared });
+    }
 }

@@ -39,6 +39,11 @@ public:
 	 */
 	void PostSeasonRole(const FString& SeasonId, const FString& PlayerId, const FString& Role, TFunction<void(bool bSuccess, bool bAlreadyAssigned)> Callback);
 
+	/**
+	 * Async call to GET /seasons/{SeasonId}/players/{PlayerId}/has-shared
+	 */
+	void GetHasShared(const FString& SeasonId, const FString& PlayerId, TFunction<void(bool bSuccess, bool bHasShared)> Callback);
+
 private:
 	// Hardcoded for now. In a real project, read from an INI file.
 	FString BackendBaseUrl = TEXT("http://127.0.0.1:5054");
@@ -47,4 +52,5 @@ private:
 	void OnCheckpointClaimResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback);
 	void OnGetSeasonRoleResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, const FString&)> Callback);
 	void OnPostSeasonRoleResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback);
+	void OnGetHasSharedResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback);
 };

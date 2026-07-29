@@ -222,3 +222,47 @@ void UBackendApiClient::OnPostSeasonRoleResponseReceived(FHttpRequestPtr Request
 		Callback(false, false);
 	}
 }
+
+void UBackendApiClient::GetHasShared(const FString& SeasonId, const FString& PlayerId, TFunction<void(bool bSuccess, bool bHasShared)> Callback)
+{
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	
+	FString Url = FString::Printf(TEXT("%s/seasons/%s/players/%s/has-shared"), *BackendBaseUrl, *SeasonId, *PlayerId);
+	Request->SetURL(Url);
+	Request->SetVerb(TEXT("GET"));
+
+	Request->OnProcessRequestComplete().BindUObject(this, &UBackendApiClient::OnGetHasSharedResponseReceived, Callback);
+	Request->ProcessRequest();
+}
+
+void UBackendApiClient::OnGetHasSharedResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback)
+{
+	if (!bConnectedSuccessfully || !Response.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("[UBackendApiClient] GetHasShared failed to connect or response invalid."));
+		Callback(false, false);
+		return;
+	}
+
+	int32 StatusCode = Response->GetResponseCode();
+	if (StatusCode == 200)
+	{
+		FString ResponseBody = Response->GetContentAsString();
+		TSharedPtr<FJsonObject> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseBody);
+
+		bool bHasShared = false;
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		{
+			JsonObject->TryGetBoolField(TEXT("hasShared"), bHasShared);
+		}
+
+		UE_LOG(LogTemp, Log, TEXT("[UBackendApiClient] GetHasShared SUCCESS (Code: %d, HasShared: %d)"), StatusCode, bHasShared);
+		Callback(true, bHasShared);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[UBackendApiClient] GetHasShared failed. Code: %d, Response: %s"), StatusCode, *Response->GetContentAsString());
+		Callback(false, false);
+	}
+}
