@@ -103,6 +103,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* ReloadAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* DashAction;
+
 	// Enhanced Input callback handlers
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -114,6 +117,8 @@ protected:
 
 	void OnFirePressed(const FInputActionValue& Value);
 	void OnReloadPressed(const FInputActionValue& Value);
+
+	void OnDashPressed(const FInputActionValue& Value);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerReload();

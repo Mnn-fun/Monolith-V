@@ -7,9 +7,9 @@
 - [x] **P3.3:** Share-Gated Checkpoint Mechanic
 - [x] **P3.4:** Jetpack Traversal Ability
 - [x] **P3.5:** Ranged Weapon System
-- [ ] **P3.6:** Secondary Combat Ability (Dash-Attack)
+- [x] **P3.6:** Secondary Combat Ability (Dash-Attack)
 
-**Last Completed Prompt ID:** P3.5
+**Last Completed Prompt ID:** P3.6
 **Current Phase:** Phase 3 (Core Networked Gameplay Mechanics)
 **Last Updated:** 2026-07-30
 **Last Updated By:** Antigravity

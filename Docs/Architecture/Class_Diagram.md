@@ -46,6 +46,11 @@ classDiagram
         +ActivateAbility(FGameplayAbilitySpecHandle Handle, FGameplayAbilityActorInfo* ActorInfo, FGameplayAbilityActivationInfo ActivationInfo, FGameplayEventData* TriggerEventData)
     }
 
+    class UGA_DashAttack {
+        +ActivateAbility()
+        +CanActivateAbility()
+    }
+
     class UGameplayEffect {
         <<engine>>
     }
@@ -59,11 +64,13 @@ classDiagram
     IAbilitySystemInterface <|-- AMonolithVCharacter
     UAttributeSet <|-- UMonolithVAttributeSet
     UGameplayAbility <|-- UGA_TestAbility
+    UGameplayAbility <|-- UGA_DashAttack
     UGameplayEffect <|-- UGE_TestDamage
 
     AMonolithVCharacter "1" *-- "1" UAbilitySystemComponent : owns
     AMonolithVCharacter "1" *-- "1" UMonolithVAttributeSet : owns
     UAbilitySystemComponent ..> UGA_TestAbility : grants/activates
+    UAbilitySystemComponent ..> UGA_DashAttack : grants/activates
     UGA_TestAbility ..> UGE_TestDamage : applies to self
     UGE_TestDamage ..> UMonolithVAttributeSet : modifies Health
 ```

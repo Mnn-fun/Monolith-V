@@ -22,6 +22,7 @@
 #include "../Combat/GE_FuelRegen.h"
 #include "../Combat/WeaponComponent.h"
 #include "../Combat/GA_FireWeapon.h"
+#include "../Combat/GA_DashAttack.h"
 AMonolithVCharacter::AMonolithVCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -282,6 +283,11 @@ void AMonolithVCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		{
 			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &AMonolithVCharacter::OnReloadPressed);
 		}
+
+		if (DashAction)
+		{
+			EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AMonolithVCharacter::OnDashPressed);
+		}
 	}
 }
 
@@ -393,6 +399,14 @@ void AMonolithVCharacter::ServerReload_Implementation()
 	}
 }
 
+void AMonolithVCharacter::OnDashPressed(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->TryActivateAbilityByClass(UGA_DashAttack::StaticClass(), true);
+	}
+}
+
 void AMonolithVCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
@@ -412,6 +426,9 @@ void AMonolithVCharacter::PossessedBy(AController* NewController)
 
 			// Grant fire weapon ability
 			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(UGA_FireWeapon::StaticClass(), 1, 0));
+
+			// Grant dash ability
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(UGA_DashAttack::StaticClass(), 1, 0));
 
 			// Apply infinite fuel regen
 			const UGameplayEffect* RegenEffectCDO = UGE_FuelRegen::StaticClass()->GetDefaultObject<UGameplayEffect>();
