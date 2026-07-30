@@ -496,24 +496,37 @@ void AMonolithVCharacter::Tick(float DeltaTime)
 	// Display fuel debug gauge
 	if (IsLocallyControlled() && AbilitySystemComponent)
 	{
+		uint64 BaseKey = (uint64)GetUniqueID();
+		
 		bool bFound = false;
 		float CurrentFuel = AbilitySystemComponent->GetGameplayAttributeValue(UMonolithVAttributeSet::GetFuelAttribute(), bFound);
 		float MaxFuel = AbilitySystemComponent->GetGameplayAttributeValue(UMonolithVAttributeSet::GetMaxFuelAttribute(), bFound);
 		if (bFound)
 		{
-			FString FuelMsg = FString::Printf(TEXT("JETPACK FUEL: %.0f / %.0f"), CurrentFuel, MaxFuel);
+			FString FuelMsg = FString::Printf(TEXT("JETPACK FUEL: %.0f / %.0f (Player %d)"), CurrentFuel, MaxFuel, BaseKey % 1000);
 			if (GEngine)
 			{
-				GEngine->AddOnScreenDebugMessage(1001, 0.0f, FColor::Cyan, FuelMsg);
+				GEngine->AddOnScreenDebugMessage(BaseKey + 1, 0.0f, FColor::Cyan, FuelMsg);
 			}
 		}
 
 		if (WeaponComponent)
 		{
-			FString AmmoMsg = FString::Printf(TEXT("AMMO: %d / %d"), WeaponComponent->Ammo, WeaponComponent->MaxAmmo);
+			FString AmmoMsg = FString::Printf(TEXT("AMMO: %d / %d (Player %d)"), WeaponComponent->Ammo, WeaponComponent->MaxAmmo, BaseKey % 1000);
 			if (GEngine)
 			{
-				GEngine->AddOnScreenDebugMessage(1002, 0.0f, FColor::Orange, AmmoMsg);
+				GEngine->AddOnScreenDebugMessage(BaseKey + 2, 0.0f, FColor::Orange, AmmoMsg);
+			}
+		}
+
+		float CurrentHealth = AbilitySystemComponent->GetGameplayAttributeValue(UMonolithVAttributeSet::GetHealthAttribute(), bFound);
+		float MaxHealth = AbilitySystemComponent->GetGameplayAttributeValue(UMonolithVAttributeSet::GetMaxHealthAttribute(), bFound);
+		if (bFound)
+		{
+			FString HealthMsg = FString::Printf(TEXT("HEALTH: %.0f / %.0f (Player %d)"), CurrentHealth, MaxHealth, BaseKey % 1000);
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(BaseKey + 3, 0.0f, FColor::Red, HealthMsg);
 			}
 		}
 	}

@@ -28,7 +28,8 @@ public class MonolithV : ModuleRules
 			"JsonUtilities",
 			"UMG",
 			"Slate",
-			"SlateCore"
+			"SlateCore",
+			"AIModule"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

@@ -8,14 +8,15 @@
 - [x] **P3.4:** Jetpack Traversal Ability
 - [x] **P3.5:** Ranged Weapon System
 - [x] **P3.6:** Secondary Combat Ability (Dash-Attack)
+- [x] **P3.7:** Scalable AI Framework
 
-**Last Completed Prompt ID:** P3.6
+**Last Completed Prompt ID:** P3.7
 **Current Phase:** Phase 3 (Core Networked Gameplay Mechanics)
 **Last Updated:** 2026-07-30
 **Last Updated By:** Antigravity
 
 ## Next Prompt To Run
-`P3.4` in `PromptBook/03_Game_Development.md`
+`P3.8` in `PromptBook/03_Game_Development.md`
 
 ## Build Status
 - Unreal client: scaffolded, compiles offline and links cleanly (`UnrealEditor-MonolithV.dll`); GameMode sets `DefaultPawnClass = AMonolithVCharacter` and `PlayerControllerClass = AMonolithVPlayerController`; `AMonolithVCharacter` implements `IAbilitySystemInterface` with `UAbilitySystemComponent` (`ReplicationMode=Mixed`) and `UMonolithVAttributeSet` (`Health`, `MaxHealth`), dual-init `InitAbilityActorInfo` (`PossessedBy` on server, `OnRep_PlayerState` on client), Enhanced Input (`IA_Move`, `IA_Look`, `IA_TestAbility`, `IMC_Default`), `NetUpdateFrequency=30.f`, `MinNetUpdateFrequency=10.f`, `NetworkSmoothingMode=Exponential`, and visible TPP Cylinder avatar (`/Engine/BasicShapes/Cylinder.Cylinder`, `500.0f` spring arm); `UGA_TestAbility` and `UGE_TestDamage` implemented for GAS attribute verification. EOS subsystem confirmed live (`LogOnline: OSS: Created online subsystem instance for: EOS` / `Loaded subsystem for type [EOS]`).

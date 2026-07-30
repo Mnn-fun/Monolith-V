@@ -51,6 +51,20 @@ classDiagram
         +CanActivateAbility()
     }
 
+    class AEnemyBaseCharacter {
+        +UAbilitySystemComponent* AbilitySystemComponent
+        +EEnemyTier EnemyTier
+    }
+
+    class ASoldierEnemyCharacter {
+    }
+
+    class AEnemyAIController {
+    }
+
+    class UBTTask_AttackTarget {
+    }
+
     class UGameplayEffect {
         <<engine>>
     }
@@ -61,14 +75,19 @@ classDiagram
     }
 
     ACharacter <|-- AMonolithVCharacter
+    ACharacter <|-- AEnemyBaseCharacter
     IAbilitySystemInterface <|-- AMonolithVCharacter
+    IAbilitySystemInterface <|-- AEnemyBaseCharacter
+    AEnemyBaseCharacter <|-- ASoldierEnemyCharacter
     UAttributeSet <|-- UMonolithVAttributeSet
     UGameplayAbility <|-- UGA_TestAbility
     UGameplayAbility <|-- UGA_DashAttack
     UGameplayEffect <|-- UGE_TestDamage
 
     AMonolithVCharacter "1" *-- "1" UAbilitySystemComponent : owns
+    AEnemyBaseCharacter "1" *-- "1" UAbilitySystemComponent : owns
     AMonolithVCharacter "1" *-- "1" UMonolithVAttributeSet : owns
+    AEnemyBaseCharacter "1" *-- "1" UMonolithVAttributeSet : owns
     UAbilitySystemComponent ..> UGA_TestAbility : grants/activates
     UAbilitySystemComponent ..> UGA_DashAttack : grants/activates
     UGA_TestAbility ..> UGE_TestDamage : applies to self
