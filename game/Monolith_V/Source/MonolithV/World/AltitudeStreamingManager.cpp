@@ -142,6 +142,8 @@ void AAltitudeStreamingManager::CheckPlayerAltitudes()
 		}
 	}
 
+	ActiveBands = NeededBands;
+
 	// 2. Trigger load for any needed band that isn't loaded yet
 	for (int32 NeededBandIndex : NeededBands)
 	{
@@ -231,6 +233,8 @@ void AAltitudeStreamingManager::UnloadBand(int32 BandIndex)
 			UE_LOG(LogTemp, Log, TEXT("[AltitudeStreaming] Unloaded Band %d"), BandIndex);
 		}
 		LoadedBands.Remove(BandIndex);
+		
+		OnBandUnloaded.Broadcast(BandIndex);
 	}
 }
 
@@ -257,4 +261,14 @@ void AAltitudeStreamingManager::OnBandLevelLoaded()
 			}
 		}
 	}
+}
+
+bool AAltitudeStreamingManager::GetBandConfig(int32 BandIndex, FAltitudeBand& OutBand) const
+{
+	if (BandIndex >= 0 && BandIndex < Bands.Num())
+	{
+		OutBand = Bands[BandIndex];
+		return true;
+	}
+	return false;
 }

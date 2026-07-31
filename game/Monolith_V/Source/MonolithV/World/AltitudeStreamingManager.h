@@ -13,6 +13,8 @@ class APlayerState;
  * Server-authoritative manager responsible for tracking player altitudes (~1Hz check)
  * and dynamically loading/unloading sublevel chunks (FAltitudeBand) via ULevelStreamingDynamic.
  */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBandUnloaded, int32, BandIndex);
+
 UCLASS()
 class MONOLITHV_API AAltitudeStreamingManager : public AActor
 {
@@ -20,6 +22,19 @@ class MONOLITHV_API AAltitudeStreamingManager : public AActor
 
 public:
 	AAltitudeStreamingManager();
+
+	// Expose for Monolith Spawner
+	const TMap<int32, TObjectPtr<ULevelStreamingDynamic>>& GetLoadedBands() const { return LoadedBands; }
+
+	// Bands that are currently active (including persistent levels like Band 0)
+	TSet<int32> ActiveBands;
+	const TSet<int32>& GetActiveBands() const { return ActiveBands; }
+
+	UFUNCTION(BlueprintCallable, Category = "Streaming")
+	bool GetBandConfig(int32 BandIndex, FAltitudeBand& OutBand) const;
+
+	UPROPERTY(BlueprintAssignable, Category = "Streaming")
+	FOnBandUnloaded OnBandUnloaded;
 
 protected:
 	virtual void BeginPlay() override;

@@ -18,6 +18,7 @@ public class MonolithV : ModuleRules
 			"Engine",
 			"InputCore",
 			"EnhancedInput",
+			"NavigationSystem",
 			"GameplayAbilities",
 			"GameplayTags",
 			"GameplayTasks",

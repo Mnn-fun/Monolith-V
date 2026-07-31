@@ -11,4 +11,7 @@ class MONOLITHV_API ASoldierEnemyCharacter : public AEnemyBaseCharacter
 
 public:
 	ASoldierEnemyCharacter();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	TWeakObjectPtr<class AGeneralEnemyCharacter> AssignedGeneral;
 };

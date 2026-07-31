@@ -40,6 +40,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	UMeleeHitboxComponent* MeleeHitboxComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning")
+	int32 SpawnedBandIndex = -1;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* NewController) override;
