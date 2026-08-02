@@ -125,6 +125,51 @@ void UBackendApiClient::OnCheckpointClaimResponseReceived(FHttpRequestPtr Reques
 	}
 }
 
+void UBackendApiClient::GetLatestCheckpoint(const FString& SeasonId, const FString& PlayerId, TFunction<void(bool bSuccess, int32 LatestCheckpointIndex)> Callback)
+{
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	
+	FString Url = FString::Printf(TEXT("%s/seasons/%s/players/%s/checkpoints/latest"), *BackendBaseUrl, *SeasonId, *PlayerId);
+	Request->SetURL(Url);
+	Request->SetVerb(TEXT("GET"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+
+	Request->OnProcessRequestComplete().BindUObject(this, &UBackendApiClient::OnGetLatestCheckpointResponseReceived, Callback);
+	Request->ProcessRequest();
+}
+
+void UBackendApiClient::OnGetLatestCheckpointResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, int32)> Callback)
+{
+	if (!bConnectedSuccessfully || !Response.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("[UBackendApiClient] GetLatestCheckpoint failed to connect or response invalid."));
+		Callback(false, 0);
+		return;
+	}
+
+	int32 StatusCode = Response->GetResponseCode();
+	if (StatusCode == 200 || StatusCode == 201)
+	{
+		FString ResponseBody = Response->GetContentAsString();
+		TSharedPtr<FJsonObject> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseBody);
+
+		int32 LatestCheckpointIndex = 0;
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		{
+			JsonObject->TryGetNumberField(TEXT("latestCheckpointIndex"), LatestCheckpointIndex);
+		}
+
+		UE_LOG(LogTemp, Log, TEXT("[UBackendApiClient] GetLatestCheckpoint SUCCESS (Code: %d, LatestCheckpointIndex: %d)"), StatusCode, LatestCheckpointIndex);
+		Callback(true, LatestCheckpointIndex);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[UBackendApiClient] GetLatestCheckpoint failed. Code: %d, Response: %s"), StatusCode, *Response->GetContentAsString());
+		Callback(false, 0);
+	}
+}
+
 void UBackendApiClient::GetSeasonRole(const FString& SeasonId, const FString& PlayerId, TFunction<void(bool bSuccess, const FString& Role)> Callback)
 {
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();

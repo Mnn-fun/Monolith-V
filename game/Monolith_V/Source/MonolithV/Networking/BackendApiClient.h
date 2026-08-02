@@ -30,6 +30,11 @@ public:
 	void PostCheckpointClaim(const FString& SeasonId, const FString& PlayerId, int32 CheckpointIndex, TFunction<void(bool bSuccess, bool bAlreadyClaimed)> Callback);
 
 	/**
+	 * Async call to GET /seasons/{SeasonId}/players/{PlayerId}/checkpoints/latest
+	 */
+	void GetLatestCheckpoint(const FString& SeasonId, const FString& PlayerId, TFunction<void(bool bSuccess, int32 LatestCheckpointIndex)> Callback);
+
+	/**
 	 * Async call to GET /seasons/{SeasonId}/players/{PlayerId}/role
 	 */
 	void GetSeasonRole(const FString& SeasonId, const FString& PlayerId, TFunction<void(bool bSuccess, const FString& Role)> Callback);
@@ -50,6 +55,7 @@ private:
 
 	void OnShareEventResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback);
 	void OnCheckpointClaimResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback);
+	void OnGetLatestCheckpointResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, int32)> Callback);
 	void OnGetSeasonRoleResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, const FString&)> Callback);
 	void OnPostSeasonRoleResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback);
 	void OnGetHasSharedResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully, TFunction<void(bool, bool)> Callback);

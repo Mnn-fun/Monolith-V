@@ -118,7 +118,7 @@ void AMonolithActor::SpawnForBand(int32 BandIndex)
 			if (Spawned)
 			{
 				Spawned->SpawnDefaultController();
-				Spawned->SpawnedBandIndex = BandIndex;
+				Spawned->InitializeForBand(BandIndex);
 				Spawned->OnDestroyed.AddDynamic(this, &AMonolithActor::OnEnemyDestroyed);
 				State.SpawnedEnemies.Add(Spawned);
 				return Spawned;

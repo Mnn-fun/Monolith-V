@@ -23,6 +23,9 @@
 #include "../Combat/WeaponComponent.h"
 #include "../Combat/GA_FireWeapon.h"
 #include "../Combat/GA_DashAttack.h"
+#include "Kismet/GameplayStatics.h"
+#include "../World/CheckpointActor.h"
+#include "../Combat/GE_RespawnRestore.h"
 AMonolithVCharacter::AMonolithVCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -686,4 +689,86 @@ void AMonolithVCharacter::ServerRequestShareItem_Implementation()
 			});
 		}
 	}
+}
+
+void AMonolithVCharacter::HandleDeath()
+{
+	if (!HasAuthority() || bIsDead) return;
+
+	bIsDead = true;
+
+	// Disable movement and collision for the "defeated" state
+	GetCharacterMovement()->DisableMovement();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	ClientOnDeath();
+
+	UE_LOG(LogTemp, Warning, TEXT("[Death] Player %s died! Will respawn at checkpoint %d (%s)"),
+		*GetName(), LastCheckpointIndex, *LastCheckpointLocation.ToString());
+
+	// Respawn after a short delay (3 seconds)
+	FTimerHandle RespawnTimerHandle;
+	GetWorldTimerManager().SetTimer(RespawnTimerHandle, [this]()
+	{
+		if (!IsValid(this)) return;
+
+		// Determine respawn location
+		FVector RespawnLocation = LastCheckpointLocation;
+		if (RespawnLocation.IsNearlyZero())
+		{
+			// No checkpoint ever touched — fallback to world origin + small offset
+			RespawnLocation = FVector(0.f, 0.f, 300.f);
+			UE_LOG(LogTemp, Warning, TEXT("[Death] No checkpoint found, using fallback spawn."));
+		}
+
+		// Teleport to checkpoint
+		SetActorLocation(RespawnLocation);
+
+		// Apply Respawn GE to restore Health/Fuel
+		if (AbilitySystemComponent)
+		{
+			FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+			EffectContext.AddInstigator(this, this);
+			FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(UGE_RespawnRestore::StaticClass(), 1.0f, EffectContext);
+			if (SpecHandle.IsValid())
+			{
+				AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+			}
+		}
+
+		// Reset state
+		bIsDead = false;
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+		ClientOnRespawn();
+
+		UE_LOG(LogTemp, Warning, TEXT("[Death] Player %s respawned at %s"), *GetName(), *RespawnLocation.ToString());
+	}, 3.0f, false);
+}
+
+void AMonolithVCharacter::ClientOnDeath_Implementation()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		// Simple camera fade to black
+		if (APlayerCameraManager* CamManager = PC->PlayerCameraManager)
+		{
+			CamManager->StartCameraFade(0.0f, 1.0f, 1.0f, FColor::Black, false, true);
+		}
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("You Died!"));
+}
+
+void AMonolithVCharacter::ClientOnRespawn_Implementation()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		// Fade back from black
+		if (APlayerCameraManager* CamManager = PC->PlayerCameraManager)
+		{
+			CamManager->StartCameraFade(1.0f, 0.0f, 1.0f, FColor::Black, false, false);
+		}
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Respawned at Checkpoint!"));
 }

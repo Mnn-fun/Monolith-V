@@ -43,8 +43,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning")
 	int32 SpawnedBandIndex = -1;
 
+	/** Called by the spawner after setting the band index — activates flying for Band 2+ */
+	void InitializeForBand(int32 BandIndex);
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	virtual void PossessedBy(AController* NewController) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
@@ -62,4 +66,5 @@ protected:
 	virtual void Die();
 
 	bool bIsDead;
+	bool bCanFly = false;
 };

@@ -1,20 +1,28 @@
 #include "EnemyBaseCharacter.h"
+#include "EnemyAIController.h"
 #include "AbilitySystemComponent.h"
 #include "../Combat/MonolithVAttributeSet.h"
 #include "../Combat/MeleeHitboxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "../Player/MonolithVCharacter.h"
 
 AEnemyBaseCharacter::AEnemyBaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	AIControllerClass = AEnemyAIController::StaticClass();
+
 	// Enable server-authoritative movement for enemies too
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = true;
 		GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
+		GetCharacterMovement()->bUseRVOAvoidance = true;
+		GetCharacterMovement()->AvoidanceConsiderationRadius = 150.0f;
 	}
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
@@ -44,6 +52,74 @@ void AEnemyBaseCharacter::BeginPlay()
 	{
 		// Listen for health changes to handle death
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetHealthAttribute()).AddUObject(this, &AEnemyBaseCharacter::OnHealthChanged);
+	}
+}
+
+void AEnemyBaseCharacter::InitializeForBand(int32 BandIndex)
+{
+	SpawnedBandIndex = BandIndex;
+
+	// Band 2+ enemies can fly to chase the player through the air
+	if (BandIndex >= 2 && GetCharacterMovement())
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		GetCharacterMovement()->MaxFlySpeed = 600.0f;
+		GetCharacterMovement()->BrakingDecelerationFlying = 1500.0f;
+		GetCharacterMovement()->GravityScale = 0.0f;
+		bCanFly = true;
+		UE_LOG(LogTemp, Warning, TEXT("[Enemy] %s initialized as FLYING enemy for Band %d"), *GetName(), BandIndex);
+	}
+}
+
+void AEnemyBaseCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (!HasAuthority() || bIsDead) return;
+
+	// Fallback direct chase: find nearest player and walk toward them
+	// This ensures enemies work even without NavMesh on upper bands
+	APawn* ClosestPlayer = nullptr;
+	float ClosestDist = MAX_flt;
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* PC = It->Get();
+		if (PC && PC->GetPawn())
+		{
+			float Dist = FVector::Dist(GetActorLocation(), PC->GetPawn()->GetActorLocation());
+			if (Dist < ClosestDist)
+			{
+				ClosestDist = Dist;
+				ClosestPlayer = PC->GetPawn();
+			}
+		}
+	}
+
+	if (ClosestPlayer && ClosestDist < 5000.0f)
+	{
+		FVector Direction;
+		if (bCanFly)
+		{
+			// Flying enemies: chase in full 3D space
+			Direction = (ClosestPlayer->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+		}
+		else
+		{
+			// Ground enemies: chase on the horizontal plane only
+			Direction = (ClosestPlayer->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
+		}
+
+		if (!Direction.IsNearlyZero())
+		{
+			AddMovementInput(Direction, 1.0f);
+		}
+
+		// Attack if close enough
+		if (ClosestDist < 250.0f && MeleeHitboxComponent)
+		{
+			MeleeHitboxComponent->ExecuteAttack();
+		}
 	}
 }
 

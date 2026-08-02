@@ -62,6 +62,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GAS")
 	TSubclassOf<UGameplayAbility> TestAbilityClass;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	bool bIsDead = false;
+
+	/** Last checkpoint the player touched — used for respawn location */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Checkpoint")
+	FVector LastCheckpointLocation = FVector::ZeroVector;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Checkpoint")
+	int32 LastCheckpointIndex = 0;
+
+	UFUNCTION()
+	void HandleDeath();
+
+	UFUNCTION(Client, Reliable)
+	void ClientOnDeath();
+
+	UFUNCTION(Client, Reliable)
+	void ClientOnRespawn();
+
 protected:
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))

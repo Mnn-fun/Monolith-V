@@ -2,6 +2,7 @@
 #include "GameplayEffect.h"
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
+#include "../Player/MonolithVCharacter.h"
 
 UMonolithVAttributeSet::UMonolithVAttributeSet()
 	: Health(100.0f)
@@ -52,6 +53,22 @@ void UMonolithVAttributeSet::PreAttributeChange(const FGameplayAttribute& Attrib
 	else if (Attribute == GetFuelAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.0f, GetMaxFuel());
+	}
+}
+
+void UMonolithVAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+
+	if (Attribute == GetHealthAttribute())
+	{
+		if (NewValue <= 0.0f)
+		{
+			if (class AMonolithVCharacter* Character = Cast<class AMonolithVCharacter>(GetOwningActor()))
+			{
+				Character->HandleDeath();
+			}
+		}
 	}
 }
 

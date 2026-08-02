@@ -55,3 +55,13 @@ If EOS matchmaking backend services experience transient outages or during local
    open 127.0.0.1:7777
    ```
    *(Or replace `127.0.0.1` with the authoritative server's public IP address).*
+
+---
+
+## Death & Respawn (Phase P3.9)
+
+Monolith-V features a backend-driven Checkpoint Respawn system to guarantee safe recovery across sessions and disconnections.
+
+1. **Checkpoints**: As you progress vertically through the Monolith bands, you will encounter `ACheckpointActor` platforms. Triggering these marks your progress in the ASP.NET Core backend database.
+2. **Death**: When your `Health` reaches 0 (from falling, or being defeated by Guardian AI), your character briefly enters a defeated state where movement and collision are disabled.
+3. **Respawning**: The game server queries your highest claimed checkpoint from the backend (`GET /seasons/.../checkpoints/latest`). You are then securely teleported to that specific checkpoint location on the Monolith structure, and your Health and Jetpack Fuel are fully restored.
