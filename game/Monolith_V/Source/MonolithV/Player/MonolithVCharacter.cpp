@@ -26,6 +26,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../World/CheckpointActor.h"
 #include "../Combat/GE_RespawnRestore.h"
+#include "../World/MonolithActor.h"
 AMonolithVCharacter::AMonolithVCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -464,6 +465,7 @@ void AMonolithVCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
 	DOREPLIFETIME(AMonolithVCharacter, bDebugShareConfirmed);
 	DOREPLIFETIME(AMonolithVCharacter, CurrentRole);
+	DOREPLIFETIME(AMonolithVCharacter, CurrentBandIndex);
 }
 
 void AMonolithVCharacter::OnRep_DebugShareConfirmed()
@@ -492,47 +494,31 @@ void AMonolithVCharacter::ClientShowShareGateWarning_Implementation()
 	}
 }
 
+float AMonolithVCharacter::GetDirectionToMonolith() const
+{
+	if (UWorld* World = GetWorld())
+	{
+		// Note: For a real compass, you might want to cache this actor reference instead of finding it every frame.
+		if (AActor* Monolith = UGameplayStatics::GetActorOfClass(World, AMonolithActor::StaticClass()))
+		{
+			FVector Direction = (Monolith->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+			
+			// Transform direction to local space based on character rotation
+			FVector LocalDir = GetActorTransform().InverseTransformVector(Direction);
+			
+			// Return angle in degrees (-180 to 180)
+			return FMath::RadiansToDegrees(FMath::Atan2(LocalDir.Y, LocalDir.X));
+		}
+	}
+	return 0.f;
+}
+
 void AMonolithVCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	// HUD will now read properties via delegates, no need for on-screen debug messages here
 
-	// Display fuel debug gauge
-	if (IsLocallyControlled() && AbilitySystemComponent)
-	{
-		uint64 BaseKey = (uint64)GetUniqueID();
-		
-		bool bFound = false;
-		float CurrentFuel = AbilitySystemComponent->GetGameplayAttributeValue(UMonolithVAttributeSet::GetFuelAttribute(), bFound);
-		float MaxFuel = AbilitySystemComponent->GetGameplayAttributeValue(UMonolithVAttributeSet::GetMaxFuelAttribute(), bFound);
-		if (bFound)
-		{
-			FString FuelMsg = FString::Printf(TEXT("JETPACK FUEL: %.0f / %.0f (Player %d)"), CurrentFuel, MaxFuel, BaseKey % 1000);
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(BaseKey + 1, 0.0f, FColor::Cyan, FuelMsg);
-			}
-		}
-
-		if (WeaponComponent)
-		{
-			FString AmmoMsg = FString::Printf(TEXT("AMMO: %d / %d (Player %d)"), WeaponComponent->Ammo, WeaponComponent->MaxAmmo, BaseKey % 1000);
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(BaseKey + 2, 0.0f, FColor::Orange, AmmoMsg);
-			}
-		}
-
-		float CurrentHealth = AbilitySystemComponent->GetGameplayAttributeValue(UMonolithVAttributeSet::GetHealthAttribute(), bFound);
-		float MaxHealth = AbilitySystemComponent->GetGameplayAttributeValue(UMonolithVAttributeSet::GetMaxHealthAttribute(), bFound);
-		if (bFound)
-		{
-			FString HealthMsg = FString::Printf(TEXT("HEALTH: %.0f / %.0f (Player %d)"), CurrentHealth, MaxHealth, BaseKey % 1000);
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(BaseKey + 3, 0.0f, FColor::Red, HealthMsg);
-			}
-		}
-	}
 
 	if (IsLocallyControlled() && RoleItemComponent && RoleItemComponent->bItemAvailable && CurrentRole != EPlayerRole::None)
 	{
@@ -771,4 +757,24 @@ void AMonolithVCharacter::ClientOnRespawn_Implementation()
 		}
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Respawned at Checkpoint!"));
+}
+
+void AMonolithVCharacter::FellOutOfWorld(const class UDamageType& dmgType)
+{
+	if (HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Death] Player %s fell out of the world (KillZ)! Teleporting to safety..."), *GetName());
+		
+		FVector RespawnLocation = LastCheckpointLocation;
+		if (RespawnLocation.IsNearlyZero())
+		{
+			RespawnLocation = FVector(0.f, 0.f, 600.f); // High enough to avoid immediate secondary KillZ
+		}
+		
+		SetActorLocation(RespawnLocation);
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->Velocity = FVector::ZeroVector;
+		}
+	}
 }

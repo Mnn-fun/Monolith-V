@@ -1,6 +1,7 @@
 #include "MonolithVGameMode.h"
 #include "Player/MonolithVCharacter.h"
 #include "Player/MonolithVPlayerController.h"
+#include "UI/MonolithVHUD.h"
 #include "World/AltitudeStreamingManager.h"
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
@@ -11,6 +12,7 @@ AMonolithVGameMode::AMonolithVGameMode()
 {
 	DefaultPawnClass = AMonolithVCharacter::StaticClass();
 	PlayerControllerClass = AMonolithVPlayerController::StaticClass();
+	HUDClass = AMonolithVHUD::StaticClass();
 }
 
 void AMonolithVGameMode::StartPlay()

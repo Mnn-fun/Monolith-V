@@ -72,10 +72,19 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Checkpoint")
 	int32 LastCheckpointIndex = 0;
 
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Altitude")
+	int32 CurrentBandIndex = 0;
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+	float GetDirectionToMonolith() const;
+
 	UFUNCTION()
 	void HandleDeath();
 
+	virtual void FellOutOfWorld(const class UDamageType& dmgType) override;
+
 	UFUNCTION(Client, Reliable)
+
 	void ClientOnDeath();
 
 	UFUNCTION(Client, Reliable)

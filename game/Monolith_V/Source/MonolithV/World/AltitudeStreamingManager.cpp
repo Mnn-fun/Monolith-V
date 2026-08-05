@@ -7,6 +7,7 @@
 #include "TimerManager.h"
 #include "Engine/Level.h"
 #include "GameFramework/WorldSettings.h"
+#include "../Player/MonolithVCharacter.h"
 
 AAltitudeStreamingManager::AAltitudeStreamingManager()
 {
@@ -55,13 +56,13 @@ void AAltitudeStreamingManager::CheckPlayerAltitudes()
 				continue;
 			}
 
+			float PawnZ = 0.0f;
 			APawn* Pawn = PC->GetPawn();
-			if (!Pawn)
+			if (Pawn)
 			{
-				continue;
+				PawnZ = Pawn->GetActorLocation().Z;
 			}
 
-			const float PawnZ = Pawn->GetActorLocation().Z;
 			int32 FoundBandIndex = 0;
 			bool bBandFound = false;
 
@@ -89,6 +90,12 @@ void AAltitudeStreamingManager::CheckPlayerAltitudes()
 
 			CurrentBandPerPlayer.Add(PC->PlayerState, FoundBandIndex);
 
+			if (AMonolithVCharacter* Character = Cast<AMonolithVCharacter>(Pawn))
+			{
+				Character->CurrentBandIndex = FoundBandIndex;
+			}
+
+
 			for (int32 Offset = -1; Offset <= 1; ++Offset)
 			{
 				const int32 BufferBandIndex = FoundBandIndex + Offset;
@@ -103,9 +110,14 @@ void AAltitudeStreamingManager::CheckPlayerAltitudes()
 	{
 		// Client: collect needed bands based solely on the local player's altitude
 		APlayerController* LocalPC = GetWorld()->GetFirstPlayerController();
-		if (LocalPC && LocalPC->GetPawn())
+		if (LocalPC)
 		{
-			const float PawnZ = LocalPC->GetPawn()->GetActorLocation().Z;
+			float PawnZ = 0.0f;
+			if (APawn* Pawn = LocalPC->GetPawn())
+			{
+				PawnZ = Pawn->GetActorLocation().Z;
+			}
+
 			int32 FoundBandIndex = 0;
 			bool bBandFound = false;
 
@@ -138,6 +150,11 @@ void AAltitudeStreamingManager::CheckPlayerAltitudes()
 				{
 					NeededBands.Add(BufferBandIndex);
 				}
+			}
+
+			if (AMonolithVCharacter* Character = Cast<AMonolithVCharacter>(LocalPC->GetPawn()))
+			{
+				Character->CurrentBandIndex = FoundBandIndex;
 			}
 		}
 	}

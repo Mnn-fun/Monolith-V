@@ -161,7 +161,11 @@ void AMonolithVPlayerController::ClientHideRoleSelection_Implementation()
 	if (RoleSelectWidgetInstance && RoleSelectWidgetInstance->IsInViewport())
 	{
 		RoleSelectWidgetInstance->RemoveFromParent();
-		bShowMouseCursor = false;
-		SetInputMode(FInputModeGameOnly());
 	}
+
+	// Always reset input mode to game, even if widget was already removed
+	bShowMouseCursor = false;
+	SetInputMode(FInputModeGameOnly());
+
+	UE_LOG(LogTemp, Warning, TEXT("[Client] ClientHideRoleSelection - Input mode set to GameOnly"));
 }
