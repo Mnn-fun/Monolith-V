@@ -122,7 +122,13 @@ void AMonolithVPlayerController::ServerSubmitRoleChoice_Implementation(const FSt
 				}
 				else
 				{
-					UE_LOG(LogTemp, Error, TEXT("[Server] Failed to assign role in backend."));
+					UE_LOG(LogTemp, Warning, TEXT("[Server] Failed to assign role in backend (backend offline). Using local fallback so gameplay is not blocked."));
+					bHasRoleAssigned = true;
+					if (AMonolithVCharacter* MyChar = Cast<AMonolithVCharacter>(GetPawn()))
+					{
+						MyChar->CurrentRole = (ChosenRole == "MALE") ? EPlayerRole::Male : EPlayerRole::Female;
+					}
+					ClientHideRoleSelection();
 				}
 			});
 		}

@@ -1,4 +1,5 @@
 #include "GE_DashCooldown.h"
+#include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
 
 UGE_DashCooldown::UGE_DashCooldown()
 {
@@ -7,8 +8,8 @@ UGE_DashCooldown::UGE_DashCooldown()
 
 	FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(TEXT("Ability.Cooldown.Dash"));
 	
-	FGameplayTagContainer TagContainer;
+	UTargetTagsGameplayEffectComponent& TargetTagsComponent = FindOrAddComponent<UTargetTagsGameplayEffectComponent>();
+	FInheritedTagContainer TagContainer;
 	TagContainer.AddTag(CooldownTag);
-	
-	InheritableOwnedTagsContainer.AddTag(CooldownTag);
+	TargetTagsComponent.SetAndApplyTargetTagChanges(TagContainer);
 }

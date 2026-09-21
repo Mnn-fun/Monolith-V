@@ -702,9 +702,9 @@ void AMonolithVCharacter::HandleDeath()
 		FVector RespawnLocation = LastCheckpointLocation;
 		if (RespawnLocation.IsNearlyZero())
 		{
-			// No checkpoint ever touched — fallback to world origin + small offset
-			RespawnLocation = FVector(0.f, 0.f, 300.f);
-			UE_LOG(LogTemp, Warning, TEXT("[Death] No checkpoint found, using fallback spawn."));
+			// No checkpoint ever touched — fallback to open sand plaza (away from central Monolith)
+			RespawnLocation = FVector(1500.f, 1500.f, 150.f);
+			UE_LOG(LogTemp, Warning, TEXT("[Death] No checkpoint found, using fallback spawn at open plaza."));
 		}
 
 		// Teleport to checkpoint
