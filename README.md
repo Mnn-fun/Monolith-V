@@ -8,15 +8,6 @@ This repository **is** the final-year project submission and **is** the public d
 
 ---
 
-## How to Use This Prompt Book
-
-This project is designed to survive you switching AI coding tools mid-build (Claude hits a usage limit → you continue in Antigravity, GitHub Copilot, Cursor, whatever's available). That only works if **no tool needs to remember the conversation** — every tool only needs to read files that already exist in this repo. Here's the mechanism:
-
-1. **`PROJECT_STATE.md`** (repo root) is the single source of truth for "where are we right now." It is updated at the end of every single prompt, never before. It records: current phase, last completed Prompt ID, timestamp, files touched, build/run status, known issues, and the exact next Prompt ID to execute.
-2. **The 5 numbered files in `PromptBook/`** contain every prompt required to go from empty repo to published, defended, submitted project. Prompts are numbered `P<phase>.<index>` (e.g. `P2.4`). They build strictly in order within a phase, and phases build strictly in order.
-3. **Every prompt is self-contained.** Each one opens with a "Prerequisites / State Check" block telling the agent exactly what must already exist and how to verify it (via `PROJECT_STATE.md` and `git log`), so a cold agent with zero conversation memory can pick up correctly. None of them say "as discussed" or "like before" — if it isn't written down in this repo, it doesn't count as decided.
-4. **Git is the audit trail.** Every prompt's commit message is prefixed with its Prompt ID (`[P1.3] Add Oracle schema v1`). If `PROJECT_STATE.md` and the git log ever disagree, trust `git log` and fix `PROJECT_STATE.md` to match — never the reverse.
-
 ### Switching tools mid-prompt
 
 1. Open `PROJECT_STATE.md`. Note `Last Completed Prompt ID`.
