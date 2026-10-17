@@ -118,53 +118,7 @@ This project follows an **Incremental/Iterative SDLC** (not pure Waterfall, not 
 
 ---
 
-## Estimated Timeline (30 Days, Solo)
-
-| Days | Phase | Focus |
-|---|---|---|
-| 1–4 | Phase 1 — Project Foundation | Repo/GitFlow, Unreal scaffold, EOS project, Oracle Cloud + DB provisioning, backend skeleton, Redis, CI, SRS draft |
-| 5–10 | Phase 2 — Core Architecture | Dedicated server build, 30Hz replication + prediction, GAS setup, altitude chunk-streaming core, atomic transaction endpoints, async Oracle layer, Redis wiring, EOS login/session flow |
-| 11–20 | Phase 3 — Game Development | Role selection + shareable items + gate mechanic, jetpack traversal, hybrid combat, guardian AI, checkpoints, Level 1 (full art) + Level 2 (greybox), HUD, seasonal reset stub, basic leaderboard |
-| 21–25 | Phase 4 — Optimization & Testing | Profiling, bandwidth/interest management, memory/streaming validation, prediction tuning, soak test, server-side validation hardening, unit tests, CI hardening, bug bash |
-| 26–30 | Phase 5 — Deployment & Publishing | Prod VM + DB deploy, Docker packaging, client packaging, docs finalization, presentation deck, GitHub polish, public publish, submission packaging |
-
----
-
-## Milestone Checklist
-
-- [ ] **M1** — Repo live on GitHub with GitFlow branches, CI green on empty scaffold (end of Phase 1)
-- [ ] **M2** — Two Unreal clients connect to one dedicated server instance and see each other move, replicated at 30Hz, with client prediction masking latency (end of Phase 2)
-- [ ] **M3** — Full solo climb loop playable: role select → jetpack up altitude chunks → fight 1 guardian archetype → hit a share-gated checkpoint with a second player → respawn on death (end of Phase 3)
-- [ ] **M4** — Profiled, soak-tested build with no server-thread DB blocking, documented perf numbers, passing unit tests, green CI (end of Phase 4)
-- [ ] **M5** — Publicly deployed on Oracle Cloud, installable by a stranger following `Docs/InstallationGuide.md`, full documentation set complete (end of Phase 5)
-
----
-
-## Presentation Checklist
-
-- [ ] 10–15 slide deck following `Docs/Presentation/SlideOutline.md` (problem → 4 pillars → architecture diagram → live demo → results/metrics → future work)
-- [ ] Recorded backup demo video (in case live network demo fails in front of evaluators)
-- [ ] Live demo script with a second machine/laptop or two Unreal client instances ready to show real multiplayer, not single-player-looking footage
-- [ ] Architecture diagram printed/exportable as a single clear image (not a screenshot of code)
-- [ ] One slide explicitly mapping abstract's 4 pillars → the actual shipped feature proving each one
-- [ ] Answers prepared for the obvious question: "why isn't this using raw sockets / a bigger world / Redis-at-scale yet" → point to Future Roadmap
-
-## College Submission Checklist
-
-- [ ] `Docs/SRS.md` complete
-- [ ] `Docs/SDLC.md` complete (this roadmap, formalized)
-- [ ] All 6 diagrams present in `Docs/Architecture/`
-- [ ] `Docs/Testing/TestPlan.md` with actual executed results, not just a template
-- [ ] `Docs/RiskAnalysis.md` complete
-- [ ] `Docs/UserManual.md` complete
-- [ ] `Docs/InstallationGuide.md` verified by following it on a clean machine/VM
-- [ ] Public GitHub repo link ready to share with evaluators
-- [ ] Final `PROJECT_STATE.md` shows all 5 phases complete
-- [ ] Packaged, runnable build (client + server) attached/linked in submission
-
----
-
-## Future Roadmap (Post-Month-1)
+## Future Roadmap 
 
 Everything below is **architecturally supported** by the Month-1 build (no rewrite required) but intentionally not built yet, to keep the solo 1-month scope real:
 
